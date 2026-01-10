@@ -1,11 +1,95 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>Home</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trip+ | Home</title>
+  <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
 </head>
-<body>
-  <h1>ログイン成功 🎉</h1>
-  <p>ようこそ {{ request.user.username }} さん</p>
+<body class="app-body">
+
+  <!-- Top Nav -->
+  <header class="nav">
+    <div class="nav-left">
+      <div class="nav-brand">Trip+</div>
+
+      <nav class="nav-links">
+        <a href="{% url 'home' %}" class="nav-link active">ホームへ</a>
+        <a href="{% url 'word_search' %}" class="nav-link">ワード検索</a>
+        <a href="{% url 'favorites' %}" class="nav-link">お気に入り一覧</a>
+        <a href="{% url 'reviews' %}" class="nav-link">クチコミ一覧</a>
+        <a href="{% url 'review_post' %}" class="nav-link">クチコミ投稿</a>
+        <a href="{% url 'spot_create' %}" class="nav-link">スポット登録</a>
+      </nav>
+    </div>
+
+    <div class="nav-right">
+      <div class="dropdown">
+        <button class="dropdown-btn" id="accountBtn">アカウント ▾</button>
+        <div class="dropdown-menu" id="accountMenu">
+          <a class="dropdown-item" href="{% url 'email_change' %}">メールアドレス変更</a>
+          <a class="dropdown-item" href="{% url 'password_change' %}">パスワード変更</a>
+          <button class="dropdown-item danger" id="logoutOpenBtn" type="button">ログアウト</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="page">
+    <div class="section-title">● オススメ観光体験</div>
+
+    <a class="recommend-card" href="{% url 'spot_detail' 1 %}">
+      <div class="recommend-image">
+        <!-- 画像はまず固定（後でDBから差し替え） -->
+        <img src="{% static 'accounts/sample_spot.jpg' %}" alt="おすすめスポット">
+      </div>
+      <div class="recommend-info">
+        <div class="spot-name">沖縄（青の洞窟）</div>
+        <div class="spot-address">沖縄県国頭郡恩納村真栄田469-1</div>
+      </div>
+    </a>
+  </main>
+
+  <!-- Logout Modal -->
+  <div class="modal-backdrop" id="logoutModal">
+    <div class="modal">
+      <div class="modal-title">ログアウトしますか？</div>
+
+      <form method="post" action="{% url 'logout' %}" class="modal-actions">
+        {% csrf_token %}
+        <button type="submit" class="btn danger">はい</button>
+        <button type="button" class="btn" id="logoutCancelBtn">いいえ</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // dropdown
+    const btn = document.getElementById('accountBtn');
+    const menu = document.getElementById('accountMenu');
+
+    btn.addEventListener('click', () => {
+      menu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.dropdown')) menu.classList.remove('open');
+    });
+
+    // logout modal
+    const modal = document.getElementById('logoutModal');
+    document.getElementById('logoutOpenBtn').addEventListener('click', () => {
+      modal.classList.add('show');
+      menu.classList.remove('open');
+    });
+    document.getElementById('logoutCancelBtn').addEventListener('click', () => {
+      modal.classList.remove('show');
+    });
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('show');
+    });
+  </script>
 </body>
 </html>

@@ -1,0 +1,50 @@
+{% load static %}
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>お気に入り一覧 | Trip+</title>
+  <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+</head>
+
+<body class="app-body">
+  <!-- Top Nav（home.htmlと同じものをコピペでOK） -->
+  <header class="nav">
+    <div class="nav-left">
+      <div class="nav-brand">Trip+</div>
+
+      <nav class="nav-links">
+        <a href="{% url 'home' %}" class="nav-link">ホームへ</a>
+        <a href="{% url 'word_search' %}" class="nav-link">ワード検索</a>
+        <a href="{% url 'favorites' %}" class="nav-link active">お気に入り一覧</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page">
+    <div class="section-title">● お気に入り一覧</div>
+
+    {% if spots %}
+      <div class="list">
+        {% for spot in spots %}
+          <a class="card" href="#" style="text-decoration:none;">
+             <a class="recommend-card" href="{% url 'spot_detail' 1 %}">
+      <div class="recommend-image">
+        <!-- 画像はまず固定（後でDBから差し替え） -->
+        <img src="{% static 'accounts/sample_spot.jpg' %}" alt="おすすめスポット">
+      </div>
+      <div class="recommend-info">
+        <div class="spot-name">沖縄（青の洞窟）</div>
+        <div class="spot-address">沖縄県国頭郡恩納村真栄田469-1</div>
+            </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>まだお気に入りはありません（ダミー）</p>
+    {% endif %}
+  </main>
+</body>
+</html>
