@@ -25,25 +25,23 @@
   <main class="page">
     <div class="section-title">● お気に入り一覧</div>
 
-    {% if spots %}
-      <div class="list">
-        {% for spot in spots %}
-          <a class="card" href="#" style="text-decoration:none;">
-             <a class="recommend-card" href="{% url 'spot_detail' 1 %}">
-      <div class="recommend-image">
-        <!-- 画像はまず固定（後でDBから差し替え） -->
-        <img src="{% static 'accounts/sample_spot.jpg' %}" alt="おすすめスポット">
+{% if spots %}
+
+  <div class="list">
+    {% for spot in spots %}
+      <a class="recommend-card" href="#">
+        <div class="recommend-image">
+         <img src="{% static 'accounts/sample_spot.jpg' %}" alt="スポット">
       </div>
       <div class="recommend-info">
-        <div class="spot-name">沖縄（青の洞窟）</div>
-        <div class="spot-address">沖縄県国頭郡恩納村真栄田469-1</div>
-            </div>
-            </div>
-          </a>
-        {% endfor %}
+        <div class="spot-name">{{ spot.name}}</div>
+        <div class="spot-address">{{ spot.address }}</div>
       </div>
-    {% else %}
-      <p>まだお気に入りはありません（ダミー）</p>
+    </a>
+  {% endfor %}
+</div>
+{% else %}
+    <p>まだお気に入りはありません（ダミー）</p>
     {% endif %}
   </main>
 </body>
