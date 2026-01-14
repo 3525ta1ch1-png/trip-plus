@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
-from spots.models import Spot
+from spots.models import Spot, Favorite
 
 
 
@@ -31,7 +31,8 @@ def home(request):
 
 @login_required
 def favorites(request):
-    spots = Spot.objects.all()[:3]
+    favorites = Favorite.objects.filter(user=request.user).select_related("spot")
+    spots = [f.spot for f in favorites]
     return render(request, "accounts/favorites.html", {"spots": spots})
 
 @login_required
