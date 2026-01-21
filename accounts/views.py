@@ -26,7 +26,7 @@ def login_view(request):
 
 @login_required 
 def home(request):
-    spot = Spot.objects.order_by("?").first()
+    spot = Spot.objects.order_by("-created_at").first()
     return render(request, "accounts/home.html", {"spot": spot})
 
 @login_required
@@ -54,10 +54,6 @@ def email_change(request):
 @login_required
 def password_change(request):
     return HttpResponse("パスワード変更（ダミー）")
-
-@login_required
-def spot_detail(request, pk):
-    return HttpResponse(f"スポット詳細（ダミー） id={pk}")
 
 @login_required
 def word_search(request):

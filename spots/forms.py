@@ -1,0 +1,32 @@
+from django import forms
+from .models import Spot, Review
+
+class SpotForm(forms.ModelForm):
+    class Meta:
+        model = Spot
+        fields = ["name", "address", "image_url","language", "mood", "purpose", "start_at", "end_at",]
+        widgets = {
+    "start_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "end_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        }
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ["rating", "comment"]
+
+class WordSearchForm(forms.Form):
+    mood = forms.CharField(required=False, label="気分")
+    purpose = forms.CharField(required=False, label="目的")
+    language = forms.CharField(required=False, label="言語")
+
+    start_at = forms.DateTimeField(
+        required=False,
+        label="開始時間",
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"})
+    )
+    end_at = forms.DateTimeField(
+        required=False,
+        label="終了時間",
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"})
+    )

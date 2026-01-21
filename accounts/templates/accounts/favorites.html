@@ -29,7 +29,7 @@
 
   <div class="list">
     {% for spot in spots %}
-      <a class="recommend-card" href="#">
+      <a class="recommend-card" href="{% url `spot_detail` spot.id %}">
         <div class="recommend-image">
          <img src="{% static 'accounts/sample_spot.jpg' %}" alt="スポット">
       </div>

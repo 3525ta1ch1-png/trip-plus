@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ spot.name }}{% endblock %}
+{% block header_title %}スポット詳細{% endblock %}
+{% block header_action %}
+  <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">一覧へ</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);border:1px solid #eee;}
+  h1{margin:0 0 6px;font-size:22px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h1>{{ spot.name }}</h1>
+  <div class="muted">住所：{{ spot.address }}</div>
+</div>
+
+<div style="display:flex; gap:10px; margin-top:14px;">
+  <a class="btn" href="{% url 'spots:spot_update' spot.id %}">編集</a>
+  <a class="btn btn-sub" href="{% url 'spots:spot_delete' spot.id %}">削除</a>
+</div>
+
+{% endblock %}
+
+<hr>
+<h2>クチコミ</h2>
+
+<a class="btn" href="{% url 'spots:review_create' spot.pk %}">＋クチコミ投稿</a>
+
+{% for r in spot.reviews.all %}
+  <div style="background:#fff; padding:12px; border-radius:12px; margin-top:10px;">
+    <div>{{ r.user }} / ★{{ r.rating }}</div>
+    <div style="color:#555;">{{ r.comment }}</div>
+  </div>
+{% empty %}
+  <p>まだクチコミがありません。</p>
+{% endfor %}

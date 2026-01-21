@@ -40,7 +40,7 @@
   <main class="page">
     <div class="section-title">● オススメ観光体験</div>
 
-    <a class="recommend-card" href="{% url 'spot_detail' 1 %}">
+    <a class="recommend-card" href="{% url 'spots:spot_detail' spot.id %}">
       <div class="recommend-image">
         <!-- 画像はまず固定（後でDBから差し替え） -->
         <img src="{% static 'accounts/sample_spot.jpg' %}" alt="おすすめスポット">

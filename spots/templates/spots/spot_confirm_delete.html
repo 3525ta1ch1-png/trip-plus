@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}削除確認{% endblock %}
+{% block header_title %}削除確認{% endblock %}
+{% block header_action %}
+  <a class="btn btn-sub" href="{% url 'spots:spot_detail' spot.id %}">戻る</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);border:1px solid #eee;}
+  .danger{background:#dc2626;}
+  .row{display:flex;gap:10px;margin-top:14px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <p><strong>{{ spot.name }}</strong> を削除しますか？</p>
+  <p class="muted">この操作は取り消せません。</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="row">
+      <button class="btn danger" type="submit">削除する</button>
+      <a class="btn btn-sub" href="{% url 'spots:spot_detail' spot.id %}">キャンセル</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

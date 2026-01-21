@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>ワード検索</title>
+</head>
+<body>
+  <h1>ワード検索</h1>
+
+  <form method="get">
+    <div>
+      <label>気分</label>
+      {{ form.mood }}
+    </div>
+    <div>
+      <label>目的</label>
+      {{ form.purpose }}
+    </div>
+    <div>
+      <label>開始時間</label>
+      {{ form.start_at}}
+    </div>
+    <div>
+      <label>終了時間</label>
+      {{ form.end_at}}
+    </div>
+    <div>
+      <label>言語</label>
+      {{ form.language }}
+    </div>
+
+    <button type="submit">検索</button>
+  </form>
+
+  <hr>
+
+  <h2>結果</h2>
+  {% for spot in spots %}
+    <div>
+      <a href="{% url 'spots:spot_detail' spot.pk %}">{{ spot.name }}</a>
+      <div>{{ spot.address }}</div>
+      <div>言語: {{ spot.language }}</div>
+    </div>
+    <hr>
+  {% empty %}
+    <p>該当スポットがありません</p>
+  {% endfor %}
+</body>
+</html>

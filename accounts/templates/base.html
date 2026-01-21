@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}TRIP+{% endblock %}</title>
+  <style>
+    body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;margin:0;background:#f6f7fb;color:#111;}
+    header{background:#fff;padding:16px 20px;border-bottom:1px solid #e7e7e7;position:sticky;top:0;z-index:10;}
+    .container{max-width:900px;margin:0 auto;padding:20px;}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+    .title{font-size:20px;font-weight:800;}
+    .btn{display:inline-block;background:#1f6feb;color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;border:none;cursor:pointer;}
+    .btn:hover{opacity:.92;}
+    .btn-sub{background:#e5e7eb;color:#111;}
+    .muted{color:#6b7280;font-size:13px;}
+    input,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #ddd;outline:none;font-size:14px;background:#fff;}
+    input:focus,textarea:focus{border-color:#1f6feb;box-shadow:0 0 0 3px rgba(31,111,235,.15);}
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="topbar">
+      <div class="title">{% block header_title %}TRIP+{% endblock %}</div>
+      <div>{% block header_action %}{% endblock %}</div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

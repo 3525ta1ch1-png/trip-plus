@@ -5,10 +5,28 @@ class Spot(models.Model):
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=255, blank=True)
     image_url = models.URLField(blank=True)
+    language = models.CharField(max_length=30, blank=True)
+    mood = models.CharField(max_length=30, blank=True)
+    purpose = models.CharField(max_length=30, blank=True)
+    start_at = models.DateTimeField(null=True, blank=True)
+    end_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
+    
+class Review(models.Model):
+    spot = models.ForeignKey(Spot, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    rating = models.PositiveSmallIntegerField(default=5)
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.spot} - {self.user} ({self.rating})" 
 
 class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)

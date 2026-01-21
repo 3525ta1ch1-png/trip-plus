@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}クチコミ一覧{% endblock %}
+{% block header_title %}クチコミ一覧{% endblock %}
+
+{% block content %}
+  {% for r in reviews %}
+    <div style="background:#fff; padding:12px; border-radius:12px; margin-bottom:12px;">
+      <div>
+        <a href="{% url 'spots:spot_detail' r.spot.pk %}"><b>{{ r.spot.name }}</b></a>
+        / {{ r.user }} / ★{{ r.rating }}
+      </div>
+      <div style="color:#555; margin-top:6px;">{{ r.comment }}</div>
+      <div style="font-size:12px; color:#999; margin-top:6px;">{{ r.created_at }}</div>
+    </div>
+  {% empty %}
+    <p>クチコミがありません。</p>
+  {% endfor %}
+{% endblock %}

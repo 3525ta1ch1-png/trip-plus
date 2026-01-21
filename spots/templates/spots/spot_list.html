@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}スポット一覧{% endblock %}
+{% block header_title %}スポット一覧{% endblock %}
+{% block header_action %}
+  <a class="btn" href="{% url 'spots:spot_create' %}">＋スポット追加</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:16px;}
+  .card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 6px 18px rgba(0,0,0,.06);border:1px solid #eee;text-decoration:none;color:inherit;transition:transform .08s ease;}
+  .card:hover{transform:translateY(-2px);}
+  .thumb{height:120px;background:linear-gradient(135deg,#dbeafe,#fce7f3);display:flex;align-items:center;justify-content:center;font-weight:800;color:#374151;}
+  .card-body{padding:14px;}
+  .card-title{font-weight:900;margin:0 0 6px;font-size:16px;}
+  .card-sub{margin:0;font-size:13px;color:#6b7280;line-height:1.4;}
+  .empty{background:#fff;border:1px dashed #ccc;padding:20px;border-radius:12px;margin-top:16px;}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<form method="get" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+  <input type="text" name="q" value="{{ q|default:'' }}" placeholder="スポット名・住所で検索">
+
+  <select name="lang">
+    <option value="">言語（すべて）</option>
+    {% for l in languages %}
+      <option value="{{ l }}" {% if lang == l %}selected{% endif %}>{{ l }}</option>
+    {% endfor %}
+  </select>
+
+  <button class="btn" type="submit">検索</button>
+  <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">リセット</a>
+</form>
+
+{% if spots %}
+  <div class="grid">
+    {% for spot in spots %}
+      <a class="card" href="{% url 'spots:spot_detail' spot.id %}">
+        <div class="thumb">TRIP+</div>
+        <div class="card-body">
+          <h3 class="card-title">{{ spot.name }}</h3>
+          <p class="card-sub">{{ spot.address }}</p>
+          {% if spot.language %}
+            <p class="card-sub">言語：{{ spot.language }}</p>
+          {% endif %}
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty">
+    <p>スポットが見つかりません。</p>
+    <a class="btn" href="{% url 'spots:spot_create' %}">スポットを追加する</a>
+  </div>
+{% endif %}
+
+{% endblock %}
