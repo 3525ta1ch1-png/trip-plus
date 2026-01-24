@@ -1,12 +1,34 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Spot, Review
-from .forms import SpotForm, ReviewForm, WordSearchForm
 from django.db.models import Q
 
+from .models import Spot, Review, Favorite
+from .forms import SpotForm, ReviewForm, WordSearchForm
+
+@login_required
 def review_list(request):
-    reviews = Review.objects.select_related("spot", "user")
+    reviews = (
+        Review.objects.select_related("spot", "user")
+        .order_by("-created_at")
+    )
     return render(request, "reviews/review_list.html", {"reviews": reviews})
+
+@login_required
+def review_pick_spot(request):
+    spots = Spot.objects.order_by("-created_at")
+    return render(request, "reviews/review_pick_spot.html", {"spots": spots})
+@login_required
+def favorite_toggle(request, pk):
+    spot = get_object_or_404(Spot, pk=pk)
+
+    if request.method != "POST":
+        return redirect("spots:spot_detail", pk=spot.pk)
+    
+    fav, created = Favorite.objects.get_or_create(user=request.user, spot=spot)
+
+    if not created:
+        fav.delete()
+    return redirect("spots:spot_detail", pk=spot.pk)
 
 @login_required
 def review_create(request, spot_id):
@@ -19,11 +41,12 @@ def review_create(request, spot_id):
             review.spot = spot
             review.user = request.user
             review.save()
-            return redirect("spots:spot_detail", pk=spot.pk)
-        else:
-            form = ReviewForm()
 
-        return render(request, "reviews/review_form.html", {"form": form, "spot": spot})
+            return redirect("spots:review_list")
+    else:
+        form = ReviewForm()
+
+    return render(request, "reviews/review_form.html", {"form": form, "spot": spot})
 
 def spot_list(request):
     q = request.GET.get("q", "").strip()
@@ -53,7 +76,12 @@ def spot_list(request):
 
 def spot_detail(request, pk):
     spot = get_object_or_404(Spot, pk=pk)
-    return render(request, "spots/spot_detail.html", {"spot": spot})
+
+    is_favorited = False
+    if request.user.is_authenticated:
+        is_favorited = Favorite.objects.filter(user=request.user, spot=spot).exists()
+
+    return render(request, "spots/spot_detail.html", {"spot": spot, "is_favorited": is_favorited},)
 
 
 def spot_create(request):
@@ -75,8 +103,8 @@ def word_search(request):
     if form.is_valid():
         mood = form.cleaned_data.get("mood", "").strip()
         purpose = form.cleaned_data.get("purpose", "").strip()
-        start_at = form.cleaned_date.get("start_at")
-        end_at = form.cleaned_date.get("end_at")
+        start_at = form.cleaned_data.get("start_at")
+        end_at = form.cleaned_data.get("end_at")
         language = form.cleaned_data.get("language", "").strip()
 
         if mood:
@@ -89,7 +117,7 @@ def word_search(request):
             spots = spots.filter(end_at__lte=end_at)
         if language:
             spots = spots.filter(language__icontains=language)
-        return render(request, "spots/word_search.html", {"form": form, "spots": spots})
+    return render(request, "spots/word_search.html", {"form": form, "spots": spots})
 
 def spot_update(request, pk):
     spot = get_object_or_404(Spot, pk=pk)

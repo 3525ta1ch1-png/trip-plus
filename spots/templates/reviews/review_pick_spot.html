@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>クチコミ投稿するスポットを選択</h1>
+
+{% if spots %}
+  <ul>
+    {% for s in spots %}
+      <li style="margin:10px 0; padding:10px; border:1px solid #eee; border-radius:12px;">
+        <div><strong>{{ s.name }}</strong></div>
+        <div style="color:#777; font-size:12px;">{{ s.address }}</div>
+        <a class="btn" href="{% url 'spots:review_create' s.pk %}">このスポットに投稿</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>スポットがまだありません。</p>
+{% endif %}
+{% endblock %}

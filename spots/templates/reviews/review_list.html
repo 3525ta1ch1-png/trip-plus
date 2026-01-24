@@ -1,18 +1,45 @@
 {% extends "base.html" %}
+
 {% block title %}クチコミ一覧{% endblock %}
 {% block header_title %}クチコミ一覧{% endblock %}
+{% block header_action %}
+  <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">スポット一覧へ</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .wrap{max-width:900px;margin:0 auto;}
+  .card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);margin:12px 0;}
+  .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+  .title{font-weight:900;}
+  .muted{color:#6b7280;font-size:13px;}
+  .stars{font-weight:900;}
+</style>
+{% endblock %}
 
 {% block content %}
-  {% for r in reviews %}
-    <div style="background:#fff; padding:12px; border-radius:12px; margin-bottom:12px;">
-      <div>
-        <a href="{% url 'spots:spot_detail' r.spot.pk %}"><b>{{ r.spot.name }}</b></a>
-        / {{ r.user }} / ★{{ r.rating }}
-      </div>
-      <div style="color:#555; margin-top:6px;">{{ r.comment }}</div>
-      <div style="font-size:12px; color:#999; margin-top:6px;">{{ r.created_at }}</div>
+<div class="wrap">
+  {% if reviews %}
+    {% for r in reviews %}
+      <div class="card">
+        <div class="row">
+          <div class="title">
+            <a href="{% url 'spots:spot_detail' r.spot.pk %}">{{ r.spot.spot.name|default:r.spot.name }}</a>
+          </div>
+          <div class="stars">★ {{ r.rating }}</div>
+        </div>
+
+        <div class="muted">
+          投稿者: {{ r.user.username }} / {{ r.created_at|date:"Y-m-d H:i" }}
+        </div>
+
+        <p style="margin-top:10px; white-space:pre-wrap;">{{ r.comment }}</p>
+        </div>
+    {% endfor %}
+  {% else %}
+    <div class="card">
+      <p>クチコミがまだありません。</p>
     </div>
-  {% empty %}
-    <p>クチコミがありません。</p>
-  {% endfor %}
+  {% endif %}
+</div>
 {% endblock %}

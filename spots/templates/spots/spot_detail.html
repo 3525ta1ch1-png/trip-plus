@@ -22,11 +22,20 @@
 <div style="display:flex; gap:10px; margin-top:14px;">
   <a class="btn" href="{% url 'spots:spot_update' spot.id %}">編集</a>
   <a class="btn btn-sub" href="{% url 'spots:spot_delete' spot.id %}">削除</a>
+
+  <from method="post" action="{% url 'spots:favorite_toggle' spot.id %}">
+    {% csrf_token %}
+    <button type="submit" class="btn">♡お気に入り切替</button>
+    {% if is_favorited %}
+      <button class="btn btn-sub" type="submit">☆ お気に入り解除</button>
+    {% else %}
+      <button class="btn" type="submit">♡ お気に入り追加</button>
+    {% endif %}
+  </from>  
 </div>
 
-{% endblock %}
+<hr style="margin:20px 0;">
 
-<hr>
 <h2>クチコミ</h2>
 
 <a class="btn" href="{% url 'spots:review_create' spot.pk %}">＋クチコミ投稿</a>
@@ -39,3 +48,4 @@
 {% empty %}
   <p>まだクチコミがありません。</p>
 {% endfor %}
+{% endblock %}

@@ -31,7 +31,7 @@ def home(request):
 
 @login_required
 def favorites(request):
-    favorites = Favorite.objects.filter(user=request.user).select_related("spot")
+    favorites = Favorite.objects.filter(user=request.user).select_related("spot").order_by("-created_at")
     spots = [f.spot for f in favorites]
     return render(request, "accounts/favorites.html", {"spots": spots})
 

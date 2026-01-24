@@ -29,8 +29,8 @@ class Review(models.Model):
         return f"{self.spot} - {self.user} ({self.rating})" 
 
 class Favorite(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    spot = models.ForeignKey(Spot, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="favorites")
+    spot = models.ForeignKey(Spot, on_delete=models.CASCADE, related_name="favorited_by")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

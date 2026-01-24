@@ -1,20 +1,45 @@
 {% extends "base.html" %}
+
 {% block title %}クチコミ投稿{% endblock %}
 {% block header_title %}クチコミ投稿{% endblock %}
+{% block header_action %}
+  <a class="btn btn-sub" href="{% url 'spots:spot_detail' spot.pk %}">戻る</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .wrap{max-width:720px;margin:0 auto;}
+  .card{background:#fff;border:1px solid #eee;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
+  label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:800;}
+  input, textarea, select{width:100%; padding:10px; border:1px solid #ddd; border-radius:10px;}
+  .btns{display:flex;gap:10px;margin-top:14px;align-items:center;}
+  .muted{color:#6b7280;font-size:13px;margin-bottom:10px;}
+</style>
+{% endblock %}
 
 {% block content %}
-  <h3>{{ spot.name }}</h3>
+<div class="wrap">
+  <div class="card">
+    <div class="muted">スポット: <b>{{ spot.name }}</b></div>
 
-  <form method="post">
-    {% csrf_token %}
-    <div>
-      <label>評価（1〜5）</label>
-      {{ form.rating }}
-    </div>
-    <div style="margin-top:10px;">
-      <label>コメント</label>
-      {{ form.comment }}
-    </div>
-    <button class="btn" style="margin-top:12px;" type="submit">投稿する</button>
-  </form>
+    <form method="post">
+      {% csrf_token %}
+
+      <div style="margin:12px 0;">
+        <label>評価（1〜5）</label>
+        {{ form.rating }}
+      </div>
+
+      <div style="margin:12px 0;">
+        <label>コメント</label>
+        {{ form.comment }}
+      </div>
+
+      <div class="btns">
+        <button class="btn" type="submit">投稿する</button>
+        <a class="btn btn-sub" href="{% url 'spots:spot_detail' spot.pk %}">キャンセル</a>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

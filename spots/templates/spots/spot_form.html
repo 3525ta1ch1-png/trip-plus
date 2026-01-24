@@ -10,8 +10,10 @@
 <style>
   .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);border:1px solid #eee;}
   .btns{display:flex;gap:10px;margin-top:14px;}
+  .field{margin-top:12px;}
   label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:800;}
   input, textarea, select{width:100%; padding:10px; border:1px solid #ddd; border-radius:10px;}
+  .errorlist{margin:6px 0 0; padding-left:18px; color:#dc2626;}
 </style>
 {% endblock %}
 
@@ -22,32 +24,62 @@
   <form method="POST">
     {% csrf_token %}
 
-  <label>気分</label>
-  {{ form.mood }}
-</div>
-<div>
-  <label>目的</label>
-  {{ form.purpose }}
-</div>
-<div>
-  <label>開始時間</label>
-    {{ form.start_at }}
-</div>
-<div>
-  <label>終了時間</label>
-  {{ form.end_at }}
-</div>
-<div>
-  <label>言語</label>
-  {{ form.language }}
-</div>
+    {{ form.non_field_errors }}
 
-<div class="btns">
-  <button class="btn" type="submit">
-    {% if mode == "update" %}更新する{% else %}登録する{% endif %}
-  </button>
-  <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">キャンセル</a>
- </div>
-</form>
+    <div class="field">
+      <label>スポット名</label>
+      {{ form.name }}
+      {{ form.name.errors }}
+    </div>
+
+    <div class="field">
+      <label>住所</label>
+      {{ form.address }}
+      {{ form.address.errors }}
+    </div>
+
+    <div class="field">
+      <label>画像URL</label>
+      {{ form.image_url }}
+      {{ form.image_url.errors }}
+    </div>
+
+    <div class="field">
+      <label>気分</label>
+      {{ form.mood }}
+      {{ form.mood.errors }}
+    </div>
+
+    <div class="field">
+      <label>目的</label>
+      {{ form.purpose }}
+      {{ form.purpose.errors }}
+    </div>
+
+    <div class="field">
+      <label>開始時間</label>
+      {{ form.start_at }}
+      {{ form.start_at.errors }}
+    </div>
+
+    <div class="field">
+      <label>終了時間</label>
+      {{ form.end_at }}
+      {{ form.end_at.errors }}
+    </div>
+
+    <div class="field">
+      <label>言語</label>
+      {{ form.language }}
+      {{ form.language.errors }}
+    </div>
+
+    <div class="btns">
+      <button class="btn" type="submit">
+        {% if mode == "update" %}更新する{% else %}登録する{% endif %}
+      </button>
+      <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">キャンセル</a>
+    </div>
+  </form>
 </div>
 {% endblock %}

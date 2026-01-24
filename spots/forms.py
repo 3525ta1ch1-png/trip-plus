@@ -6,7 +6,7 @@ class SpotForm(forms.ModelForm):
         model = Spot
         fields = ["name", "address", "image_url","language", "mood", "purpose", "start_at", "end_at",]
         widgets = {
-    "start_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
+            "start_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
             "end_at": forms.DateTimeInput(attrs={"type": "datetime-local"}),
         }
 
@@ -23,10 +23,13 @@ class WordSearchForm(forms.Form):
     start_at = forms.DateTimeField(
         required=False,
         label="開始時間",
-        widget=forms.DateTimeInput(attrs={"type": "datetime-local"})
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        input_formats=["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M"],
+
     )
     end_at = forms.DateTimeField(
         required=False,
         label="終了時間",
-        widget=forms.DateTimeInput(attrs={"type": "datetime-local"})
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        input_formats=["%Y-%m-%dT%H:%M", "%Y-%m-%d %H:%M"],
     )
