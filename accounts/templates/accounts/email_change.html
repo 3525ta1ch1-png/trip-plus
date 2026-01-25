@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}メールアドレス変更{% endblock %}
+{% block header_title %}メールアドレス変更{% endblock %}
+
+{% block content %}
+  <h2>メールアドレス変更</h2>
+  <form method="post" style="max-width:520px;">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button class="btn" type="submit">変更する</button>
+  </form>
+{% endblock %}

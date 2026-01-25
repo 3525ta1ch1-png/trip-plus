@@ -18,6 +18,7 @@
     .muted{color:#6b7280;font-size:13px;}
     input,textarea,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #ddd;outline:none;font-size:14px;background:#fff;}
     input:focus,textarea:focus,select:focus{border-color:#1f6feb;box-shadow:0 0 0 3px rgba(31,111,235,.15);}
+
     .nav { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .nav a{
       text-decoration:none;
@@ -29,6 +30,60 @@
     }
     .nav a:hover{ background:#f1f5f9; }
     .nav a.active{ background:#e5e7eb; }
+
+    /* アカウント dropdown */
+    .dropdown{ position:relative; }
+    .dropdown-menu{
+      position:absolute;
+      right:0;
+      top:44px;
+      width:200px;
+      background:#fff;
+      border:1px solid #e5e7eb;
+      border-radius:12px;
+      box-shadow:0 8px 30px rgba(0,0,0,.08);
+      padding:8px;
+      display:none;
+      z-index:20;
+    }
+    .dropdown-menu.open{ display:block; }
+
+    .dropdown-item{
+      display:block;
+      width:100%;
+      text-align:left;
+      padding:10px 12px;
+      border-radius:10px;
+      text-decoration:none;
+      color:#111;
+      background:transparent;
+      border:none;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .dropdown-item:hover{ background:#f1f5f9; }
+    .dropdown-item.danger{ color:#ef4444; font-weight:700; }
+
+    /* nav の右端にアカウントを寄せる */
+    .account-nav{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+    }
+
+    /* nav用のアカウントボタン */
+    .nav-account-btn{
+      background:transparent;
+      border:none;
+      font-weight:700;
+      font-size:14px;
+      padding:8px 10px;
+      border-radius:10px;
+      cursor:pointer;
+    }
+    .nav-account-btn:hover{
+      background:#f1f5f9;
+    }
   </style>
   {% endblock %}
 
@@ -50,8 +105,22 @@
       <a href="{% url 'spots:spot_create' %}">スポット登録</a>
       <a href="{% url 'spots:review_list' %}">クチコミ一覧</a>
       <a href="{% url 'spots:review_pick_spot' %}">クチコミ投稿</a>
-      <!-- favorites は未対応なら一旦外してOK -->
-      <!-- <a href="{% url 'favorites' %}">お気に入り一覧</a> -->
+
+      <div class="account-nav">
+        <div class="dropdown">
+          <button class="nav-account-btn" id="accountBtn" type="button">アカウント ▼</button>
+
+          <div class="dropdown-menu" id="accountMenu">
+            <a class="dropdown-item" href="{% url 'email_change' %}">メールアドレス変更</a>
+            <a class="dropdown-item" href="{% url 'password_change' %}">パスワード変更</a>
+
+            <form method="POST" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit" class="dropdown-item danger">ログアウト</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </nav>
   </div>
 </header>
@@ -59,6 +128,23 @@
 <main class="container">
   {% block content %}{% endblock %}
 </main>
+
+<script>
+  const btn = document.getElementById("accountBtn");
+  const menu = document.getElementById("accountMenu");
+
+  if (btn && menu) {
+    btn.addEventListener("click", () => {
+      menu.classList.toggle("open");
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest(".dropdown")) {
+        menu.classList.remove("open");
+      }
+    });
+  }
+</script>
 
 </body>
 </html>

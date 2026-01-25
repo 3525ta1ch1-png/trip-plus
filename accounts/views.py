@@ -3,12 +3,12 @@
 # Create your views here.
 
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
+from django.contrib.auth.forms import PasswordChangeForm
 
 from spots.models import Spot, Favorite
-
+from .forms import SignupForm, EmailChangeForm
 
 
 def login_view(request):
@@ -24,6 +24,20 @@ def login_view(request):
         
     return render(request, "accounts/login.html")
 
+def signup(request):
+
+    if request.method == "POST":
+        form = SignupForm(request.POST)
+        if form.is_vaild():
+            user = form.save(commit=False)
+            user.email = form.cleaned_data["email"]
+            user.save()
+            login(request, user)
+            return redirect("home")
+        else:
+            form = SignupForm()
+        return render(request, "accounts/signup.html", {"form": form})
+    
 @login_required 
 def home(request):
     spot = Spot.objects.order_by("-created_at").first()
@@ -37,29 +51,37 @@ def favorites(request):
 
 @login_required
 def reviews(request):
-    return HttpResponse("クチコミ一覧（ダミー）")
+   return redirect("spots:review_list")
 
 @login_required
 def review_post(request):
-    return HttpResponse("クチコミ投稿（ダミー）")
-
-@login_required
-def spot_create(request):
-    return HttpResponse("スポット登録（ダミー）")
+    return redirect("spots:review_pick_spot")
 
 @login_required
 def email_change(request):
-    return HttpResponse("メールアドレス変更（ダミー）")
+    if request.method == "POST":
+        form = EmailChangeForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect("home")
+    else:
+        form = EmailChangeForm(instence=request.user)
+
+    return render(request, "accounts/email_change.html", {"form": form})
 
 @login_required
 def password_change(request):
-    return HttpResponse("パスワード変更（ダミー）")
+    if request.method == "POST":
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            return redirect("home")
+    else:
+        form = PasswordChangeForm(user=request.user)
 
-@login_required
-def word_search(request):
-    return HttpResponse("ワード検索ページ（ダミー）")
-
-
+    return render(request, "accounts/password_change.html", {"form": form})
+            
 @login_required
 def logout_view(request):
 
