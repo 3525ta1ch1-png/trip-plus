@@ -28,15 +28,15 @@ def signup(request):
 
     if request.method == "POST":
         form = SignupForm(request.POST)
-        if form.is_vaild():
+        if form.is_valid():
             user = form.save(commit=False)
             user.email = form.cleaned_data["email"]
             user.save()
             login(request, user)
             return redirect("home")
-        else:
+    else:
             form = SignupForm()
-        return render(request, "accounts/signup.html", {"form": form})
+    return render(request, "accounts/signup.html", {"form": form})
     
 @login_required 
 def home(request):
@@ -60,8 +60,9 @@ def review_post(request):
 @login_required
 def email_change(request):
     if request.method == "POST":
-        form = EmailChangeForm(request.POST, instance=request.user)
+        form = EmailChangeForm(request.POST)
         if form.is_valid():
+            request.user.email = form.creaned_data["email"]
             form.save()
             return redirect("home")
     else:
@@ -73,7 +74,7 @@ def email_change(request):
 def password_change(request):
     if request.method == "POST":
         form = PasswordChangeForm(user=request.user, data=request.POST)
-        if form.is_valid():
+        if form.is_vaild():
             user = form.save()
             update_session_auth_hash(request, user)
             return redirect("home")

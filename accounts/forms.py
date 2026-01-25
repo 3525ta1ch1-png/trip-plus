@@ -11,8 +11,6 @@ class SignupForm(UserCreationForm):
         model = User
         fields = ("username", "email")
 
-class EmailChangeForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ("email",)
-        
+class EmailChangeForm(forms.Form):
+    email = forms.EmailField(required=True, label="新しいメールアドレス")
+    

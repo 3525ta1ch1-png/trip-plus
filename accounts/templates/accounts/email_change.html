@@ -1,12 +1,29 @@
 {% extends "base.html" %}
-{% block title %}メールアドレス変更{% endblock %}
+{% block title %}メールアドレス変更{% endblock%}
 {% block header_title %}メールアドレス変更{% endblock %}
 
 {% block content %}
-  <h2>メールアドレス変更</h2>
-  <form method="post" style="max-width:520px;">
+  <h2 style="margin:0 0 12px;">メールアドレス変更</h2>
+  <p class="muted" style="margin:0 0 18px;">新しいメールアドレスを入力してください</p>
+
+  <form method="POST" style="max-width:520px;">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn" type="submit">変更する</button>
+
+    <label style="display:block; font-wight:700; margin-bottom:6px;">
+        新しいメールアドレス
+    </label>
+    {{ form.email }}
+
+    {% if form.email.errors %}
+    　<div style="color:#ef4444; font-size:13px; margin-top:6px;">
+        {{ form.email.errors }}
+    　</div>
+    {% endif %}
+
+    <div style="margin-top:14px;">
+        <button class="btn" type="submit">変更する</button>
+        <a class="btn btn-sub" href="{% url 'home' %}" style="margin-left:8px;">戻る</a>
+    </div>
   </form>
 {% endblock %}
+
