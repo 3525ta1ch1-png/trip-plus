@@ -62,11 +62,11 @@ def email_change(request):
     if request.method == "POST":
         form = EmailChangeForm(request.POST)
         if form.is_valid():
-            request.user.email = form.creaned_data["email"]
-            form.save()
+            request.user.email = form.cleaned_data["email"]
+            request.user.save()
             return redirect("home")
     else:
-        form = EmailChangeForm(instence=request.user)
+        form = EmailChangeForm(initial={"email": request.user.email})
 
     return render(request, "accounts/email_change.html", {"form": form})
 

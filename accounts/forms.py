@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 class SignupForm(UserCreationForm):
-    email = forms.EmailField(required=True)
+    email = forms.EmailField(required=True, label="メールアドレス")
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -13,4 +13,4 @@ class SignupForm(UserCreationForm):
 
 class EmailChangeForm(forms.Form):
     email = forms.EmailField(required=True, label="新しいメールアドレス")
-    
+

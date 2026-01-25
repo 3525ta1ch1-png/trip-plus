@@ -1,12 +1,18 @@
 {% extends "base.html" %}
+
 {% block title %}新規登録{% endblock %}
 {% block header_title %}新規登録{% endblock %}
 
 {% block content %}
   <h2>新規登録</h2>
+
   <form method="post" style="max-width:520px;">
     {% csrf_token %}
     {{ form.as_p }}
     <button class="btn" type="submit">登録する</button>
   </form>
+
+  <p style="margin-top:12px;">
+    <a href="{% url 'login' %}">ログインはこちら</a>
+  </p>
 {% endblock %}
