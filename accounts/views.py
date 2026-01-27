@@ -1,7 +1,8 @@
 
 
-# Create your views here.
 
+# Create your views here.
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -20,7 +21,7 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect("home")
+            return redirect(settings.LOGIN_REDIRECT_URL)
         
     return render(request, "accounts/login.html")
 
@@ -33,7 +34,7 @@ def signup(request):
             user.email = form.cleaned_data["email"]
             user.save()
             login(request, user)
-            return redirect("home")
+            return redirect(settings.LOGIN_REDIRECT_URL)
     else:
             form = SignupForm()
     return render(request, "accounts/signup.html", {"form": form})
@@ -64,7 +65,7 @@ def email_change(request):
         if form.is_valid():
             request.user.email = form.cleaned_data["email"]
             request.user.save()
-            return redirect("home")
+            return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = EmailChangeForm(initial={"email": request.user.email})
 
@@ -74,10 +75,10 @@ def email_change(request):
 def password_change(request):
     if request.method == "POST":
         form = PasswordChangeForm(user=request.user, data=request.POST)
-        if form.is_vaild():
+        if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)
-            return redirect("home")
+            return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = PasswordChangeForm(user=request.user)
 
@@ -89,4 +90,8 @@ def logout_view(request):
     if request.method == "POST":
         logout(request)
         return redirect("login")  # ログイン画面へ戻す
-    return redirect("home")      # GETで来たらホームへ
+    return redirect(settings.LOGIN_REDIRECT_URL)      # GETで来たらホームへ
+
+def portfolio(request):
+    return render(request, "portfolio.html")
+

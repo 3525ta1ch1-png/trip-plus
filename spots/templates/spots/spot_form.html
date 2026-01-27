@@ -14,6 +14,8 @@
   label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:800;}
   input, textarea, select{width:100%; padding:10px; border:1px solid #ddd; border-radius:10px;}
   .errorlist{margin:6px 0 0; padding-left:18px; color:#dc2626;}
+  .preview{margin-top:8px;}
+  .preview img{max-width:100%; border-radius:12px;}
 </style>
 {% endblock %}
 
@@ -21,7 +23,8 @@
 <div class="card">
   <div class="muted">スポット名と住所を入力してください</div>
 
-  <form method="POST">
+  <!-- ★ enctype を必ず追加 -->
+  <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
     {{ form.non_field_errors }}
@@ -38,10 +41,17 @@
       {{ form.address.errors }}
     </div>
 
+    <!-- ★ image_url → image に変更 -->
     <div class="field">
-      <label>画像URL</label>
-      {{ form.image_url }}
-      {{ form.image_url.errors }}
+      <label>画像</label>
+      {{ form.image }}
+      {{ form.image.errors }}
+
+      {% if mode == "update" and spot.image %}
+        <div class="preview">
+          <img src="{{ spot.image.url }}" alt="現在の画像">
+        </div>
+      {% endif %}
     </div>
 
     <div class="field">

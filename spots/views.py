@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q, Avg
+from django.contrib import messages
 
 from .models import Spot, Review, Favorite
 from .forms import SpotForm, ReviewForm, WordSearchForm
@@ -41,8 +42,9 @@ def review_create(request, spot_id):
             review.spot = spot
             review.user = request.user
             review.save()
+            messages.success(request, "クチコミを投稿しました！")
 
-            return redirect("spots:review_list")
+            return redirect("spots:spot_detail", pk=spot.pk)
     else:
         form = ReviewForm()
 
@@ -81,12 +83,19 @@ def spot_detail(request, pk):
     if request.user.is_authenticated:
         is_favorited = Favorite.objects.filter(user=request.user, spot=spot).exists()
 
-    return render(request, "spots/spot_detail.html", {"spot": spot, "is_favorited": is_favorited},)
+    reviews = (
+        spot.reviews.select_related("user")
+        .order_by("-rating", "-created_at")
+    )
+    
+    avg_rating = reviews.aggregate(avg=Avg("rating"))["avg"]
+    
+    return render(request, "spots/spot_detail.html", {"spot": spot, "is_favorited": is_favorited, "reviews": reviews})
 
-
+@login_required
 def spot_create(request):
     if request.method == "POST":
-        form = SpotForm(request.POST)
+        form = SpotForm(request.POST, request.FILES)
         if form.is_valid():
             spot = form.save()
             return redirect("spots:spot_detail", pk=spot.pk)
@@ -111,19 +120,25 @@ def word_search(request):
             spots = spots.filter(mood__icontains=mood)
         if purpose:
             spots = spots.filter(purpose__icontains=purpose)
-        if start_at:
-            spots = spots.filter(start_at__gte=start_at)
-        if end_at:
-            spots = spots.filter(end_at__lte=end_at)
         if language:
             spots = spots.filter(language__icontains=language)
+        if start_at and end_at:
+            spots = spots.filter(start_at__lte=end_at, end_at__gte=start_at)
+        elif start_at:
+            spots = spots.filter(end_at__gte=start_at)
+        elif end_at:
+            spots = spots.filter(start_at__lte=end_at)
+
+    spots = spots.order_by("-created_at")
+            
     return render(request, "spots/word_search.html", {"form": form, "spots": spots})
 
+@login_required
 def spot_update(request, pk):
     spot = get_object_or_404(Spot, pk=pk)
 
     if request.method == "POST":
-        form = SpotForm(request.POST, instance=spot)
+        form = SpotForm(request.POST, request.FILES, instance=spot)
         if form.is_valid():
             spot = form.save()
             return redirect("spots:spot_detail", pk=spot.pk)
@@ -132,7 +147,7 @@ def spot_update(request, pk):
 
     return render(request, "spots/spot_form.html", {"form": form, "mode": "update", "spot": spot})
 
-
+@login_required
 def spot_delete(request, pk):
     spot = get_object_or_404(Spot, pk=pk)
 

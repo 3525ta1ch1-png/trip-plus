@@ -4,7 +4,7 @@ from django.db import models
 class Spot(models.Model):
     name = models.CharField(max_length=100)
     address = models.CharField(max_length=255, blank=True)
-    image_url = models.URLField(blank=True)
+    image = models.ImageField(upload_to="spots/", blank=True, null=True)
     language = models.CharField(max_length=30, blank=True)
     mood = models.CharField(max_length=30, blank=True)
     purpose = models.CharField(max_length=30, blank=True)

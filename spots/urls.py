@@ -15,7 +15,7 @@ urlpatterns = [
 
     path("reviews/", views.review_list, name="review_list"),
     path("reviews/new/", views.review_pick_spot, name="review_pick_spot"),
-    path("<int:spot_id>/reviews/new/", views.review_create, name="review_create"),
+    path("<int:spot_id>/reviews/create/", views.review_create, name="review_create"),
 
     path("<int:pk>/favorite/", views.favorite_toggle, name="favorite_toggle"),
 ]

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}ポートフォリオ | TRIP+{% endblock %}
+{% block header_title %}Portfolio{% endblock %}
+
+{% block content %}
+  <div style="display:grid; gap:14px;">
+
+    <div style="background:#fff;border:1px solid #eee;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);">
+      <div class="muted">旅行に、ちょっとした＋を。</div>
+      <h1 style="margin:6px 0 0;font-size:26px;font-weight:900;">Trip＋（トリッププラス）</h1>
+      <div class="muted" style="margin-top:6px;">目的地からではなく「気分・目的・時間」から旅行先（体験スポット）を探せるアプリ</div>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+        <a class="btn" href="{% url 'spots:spot_list' %}">アプリを開く</a>
+        <a class="btn btn-sub" href="{% url 'spots:word_search' %}">ワード検索へ</a>
+      </div>
+    </div>
+
+    <div style="display:grid; gap:14px; grid-template-columns: 1fr;">
+
+      <div style="background:#fff;border:1px solid #eee;border-radius:16px;padding:18px;">
+        <h2 style="margin:0 0 10px;">概要</h2>
+        <ul style="margin:0; padding-left:18px; line-height:1.8;">
+          <li>「計画疲れ」「マンネリ化」を解決するため、抽象的な希望（気分・目的・時間）から検索できます。</li>
+          <li>スポットの登録・編集・削除、口コミ、お気に入り機能を実装しています。</li>
+        </ul>
+      </div>
+
+      <div style="background:#fff;border:1px solid #eee;border-radius:16px;padding:18px;">
+        <h2 style="margin:0 0 10px;">主な機能</h2>
+        <ul style="margin:0; padding-left:18px; line-height:1.8;">
+          <li>ユーザー認証（ログイン / ログアウト / 新規登録）</li>
+          <li>スポット登録・編集・削除（画像アップロード対応）</li>
+          <li>ワード検索（気分・目的・時間帯・言語）</li>
+          <li>お気に入り登録</li>
+          <li>口コミ投稿・一覧表示</li>
+        </ul>
+      </div>
+
+      <div style="background:#fff;border:1px solid #eee;border-radius:16px;padding:18px;">
+        <h2 style="margin:0 0 10px;">使用技術</h2>
+        <ul style="margin:0; padding-left:18px; line-height:1.8;">
+          <li>Python / Django</li>
+          <li>SQLite（開発）</li>
+          <li>HTML / CSS</li>
+        </ul>
+        <div class="muted" style="margin-top:8px;">※デプロイ後は本番環境に合わせて調整</div>
+      </div>
+
+      <div style="background:#fff;border:1px solid #eee;border-radius:16px;padding:18px;">
+        <h2 style="margin:0 0 10px;">リンク</h2>
+
+        <div style="display:grid; gap:8px;">
+          <div>
+            <div class="muted">GitHub</div>
+            <a href="YOUR_GITHUB_URL" target="_blank" rel="noopener">YOUR_GITHUB_URL</a>
+          </div>
+
+          <div>
+            <div class="muted">企画書セット（企画書・画面設計図・画面遷移図・ER図）</div>
+            <a href="YOUR_GOOGLE_DRIVE_URL" target="_blank" rel="noopener">YOUR_GOOGLE_DRIVE_URL</a>
+          </div>
+        </div>
+
+        <div class="muted" style="margin-top:10px;">
+          ※上のURLはあなたのURLに置き換えてください
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock %}

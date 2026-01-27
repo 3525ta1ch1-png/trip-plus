@@ -99,7 +99,8 @@
     </div>
 
     <nav class="nav">
-      <a href="{% url 'home' %}">ホーム</a>
+      <a href="{% url 'accounts:portfolio' %}">ポートフォリオ</a>
+      <a href="{% url 'accounts:home' %}">ホーム</a>
       <a href="{% url 'spots:spot_list'%}">スポット一覧</a>
       <a href="{% url 'spots:word_search' %}">ワード検索</a>
       <a href="{% url 'spots:spot_create' %}">スポット登録</a>
@@ -111,10 +112,10 @@
           <button class="nav-account-btn" id="accountBtn" type="button">アカウント ▼</button>
 
           <div class="dropdown-menu" id="accountMenu">
-            <a class="dropdown-item" href="{% url 'email_change' %}">メールアドレス変更</a>
-            <a class="dropdown-item" href="{% url 'password_change' %}">パスワード変更</a>
+            <a class="dropdown-item" href="{% url 'accounts:email_change' %}">メールアドレス変更</a>
+            <a class="dropdown-item" href="{% url 'accounts:password_change' %}">パスワード変更</a>
 
-            <form method="POST" action="{% url 'logout' %}">
+            <form method="POST" action="{% url 'accounts:logout' %}">
               {% csrf_token %}
               <button type="submit" class="dropdown-item danger">ログアウト</button>
             </form>
@@ -126,6 +127,24 @@
 </header>
 
 <main class="container">
+
+{% if messages %}
+  <div style="margin:12px 0;">
+    {% for message in messages %}
+      <div style="
+        background:#ecfeff;
+        border:1px solid #a5f3fc;
+        color:#0e7490;
+        padding:10px 12px;
+        border-radius:12px;
+        margin-bottom:8px;
+        ">
+         {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
   {% block content %}{% endblock %}
 </main>
 

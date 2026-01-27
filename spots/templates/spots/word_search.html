@@ -1,49 +1,60 @@
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <title>ワード検索</title>
-</head>
-<body>
-  <h1>ワード検索</h1>
+{% extends "base.html" %}
 
-  <form method="get">
+{% block title %}ワード検索 | TRIP+{% endblock %}
+{% block header_title %}ワード検索{% endblock %}
+
+{% block content %}
+  <h1 style="margin: 0 0 14px;">ワード検索</h1>
+
+  <form method="get" style="display: grid; gap: 12px; max-width: 560px;">
     <div>
-      <label>気分</label>
+      <span class="muted">{{ form.mood.label }}</span>
       {{ form.mood }}
     </div>
+
     <div>
-      <label>目的</label>
+      <span class="muted">{{ form.purpose.label }}</span>
       {{ form.purpose }}
     </div>
+
     <div>
-      <label>開始時間</label>
-      {{ form.start_at}}
+      <span class="muted">{{ form.start_at.label }}</span>
+      {{ form.start_at }}
     </div>
+
     <div>
-      <label>終了時間</label>
-      {{ form.end_at}}
+      <span class="muted">{{ form.end_at.label }}</span>
+      {{ form.end_at }}
     </div>
+
     <div>
-      <label>言語</label>
+      <span class="muted">{{ form.language.label }}</span>
       {{ form.language }}
     </div>
 
-    <button type="submit">検索</button>
+    <button type="submit" class="btn">検索</button>
   </form>
 
-  <hr>
+  <hr style="margin: 22px 0; border: none; border-top: 1px solid #e7e7e7;">
 
-  <h2>結果</h2>
+  <h2 style="margin: 0 0 10px;">結果</h2>
+
   {% for spot in spots %}
-    <div>
-      <a href="{% url 'spots:spot_detail' spot.pk %}">{{ spot.name }}</a>
-      <div>{{ spot.address }}</div>
-      <div>言語: {{ spot.language }}</div>
-    </div>
-    <hr>
+    <div style="padding: 12px 0;">
+      <a href="{% url 'spots:spot_detail' spot.pk %}" style="font-weight: 800; text-decoration: none;">
+        {{ spot.name }}
+      </a>
+      <div class="muted">{{ spot.address }}</div>
+      <div class="muted">言語: {{ spot.language }}</div>
+
+      {% if spot.image %}
+         <div stale="magin-top:8px;">
+          <img src="{{ spot.image.url }}" alt="{{ spot.name }}" style="max-width:100%; border-radius:12px;">
+        </div>
+      {% endif %}
+      </div>
+    <hr style="margin: 0; border: none; border-top: 1px solid #e7e7e7;">
   {% empty %}
-    <p>該当スポットがありません</p>
+    <p class="muted">該当スポットがありません</p>
   {% endfor %}
-</body>
-</html>
+{% endblock %}
