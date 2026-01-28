@@ -1,5 +1,8 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 app_name = "spots"
 
@@ -16,6 +19,8 @@ urlpatterns = [
     path("reviews/", views.review_list, name="review_list"),
     path("reviews/new/", views.review_pick_spot, name="review_pick_spot"),
     path("<int:spot_id>/reviews/create/", views.review_create, name="review_create"),
-
+    path("reviews/<int:pk>/edit/", views.review_update, name="review_update"),
+    path("reviews/<int:pk>/delete/", views.review_delete, name="review_delete"),
     path("<int:pk>/favorite/", views.favorite_toggle, name="favorite_toggle"),
-]
+    path("favorites/", views.favorite_list, name="favorite_list"),
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

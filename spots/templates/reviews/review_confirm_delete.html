@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}クチコミ削除{% endblock %}
+{% block header_title %}クチコミ削除{% endblock %}
+{% block header_action %}
+  <a class="btn btn-sub" href="{% url 'spots:spot_detail' review.spot.pk %}">戻る</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <p>このクチコミを削除しますか？</p>
+  <p style="color:#6b7280; white-space:pre-wrap;">{{ review.comment }}</p>
+
+  <form method="post" style="margin-top:12px;">
+    {% csrf_token %}
+    <button class="btn" type="submit">削除する</button>
+    <a class="btn btn-sub" href="{% url 'spots:spot_detail' review.spot.pk %}">キャンセル</a>
+  </form>
+</div>
+{% endblock %}

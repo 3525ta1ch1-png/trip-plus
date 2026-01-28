@@ -19,12 +19,47 @@
 
 {% block content %}
 <div class="wrap">
+
+  <h1>
+    {% if spot %}
+      {{ spot.name }}のクチコミ一覧
+    {% else %}
+      クチコミ一覧
+    {% endif %}
+  </h1>
+  
+  {% if spot_id %}
+    <div style="margin:8px 0;">
+      <a class="btn btn-sub"
+        href="{% url 'spots:spot_detail' spot_id%}">
+        ← スポット詳細へ戻る
+      </a>
+    </div>
+  {% endif %}
+
+  <div style="margin:12px 0; display:flex; gap:8px;">
+    <a class="btn sort-btn {% if sort == 'new' %}active{% endif %}"
+       href="?{% if spot %}spot={{ spot.id }}&{% endif %}sort=new">
+       新着順
+    </a>
+    <a class="btn sort-btn {% if sort == 'high' %}active{% endif %}"
+       href="?{% if spot %}spot={{ spot.id }}&{% endif %}sort=high">
+       評価が高い順
+    </a>
+    <a class="btn sort-btn {% if sort == 'low' %}active{% endif %}"
+       href="?{% if spot %}spot={{ spot.id }}&{% endif %}sort=low">
+       評価が低い順
+    </a>
+  </div>
+
   {% if reviews %}
     {% for r in reviews %}
       <div class="card">
         <div class="row">
           <div class="title">
-            <a href="{% url 'spots:spot_detail' r.spot.pk %}">{{ r.spot.spot.name|default:r.spot.name }}</a>
+            <a href="{% url 'spots:spot_detail' r.spot.pk %}">
+              {{ r.spot.name }}
+            </a>
           </div>
           <div class="stars">★ {{ r.rating }}</div>
         </div>
@@ -42,4 +77,28 @@
     </div>
   {% endif %}
 </div>
+
+{% if page_obj.pagenator.num_pages > 1 %}
+  <div style="margin:20px 0; display:flex; gap:8px; justify-content:contenter;">
+
+    {% if page_obj.has_previous %}
+      <a class="btn btn-sub"
+        href="?spot={{ spot_id }}&sort={{ sort }}&page={{ page_obj.previous_page_number }}">
+       ← 前へ
+      </a>
+    {% endif %}
+
+    <span style="padding:6px 12px;">
+      {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a class="btn btn-sub"
+        href="?spot={{ spot_id }}&sort={{ sort }}&page={{ page_obj.next_page_number }}">
+       次へ →
+      </a>
+    {% endif %}
+
+    </div>
+  {% endif %}
 {% endblock %}

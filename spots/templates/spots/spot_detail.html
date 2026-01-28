@@ -15,6 +15,16 @@
 
 {% block content %}
 <div class="card">
+  {% if spot.image %}
+    <img src="{{ spot.image.url }}"
+         alt="{{ spot.name }}"
+         style="width:100%; 
+         height:220px; 
+         object-fit:cover; 
+         border-radius:14px; 
+         margin-bottom:12px;">
+  {% endif %}
+
   <h1>{{ spot.name }}</h1>
   <div class="muted">住所：{{ spot.address }}</div>
 </div>
@@ -30,52 +40,90 @@
     {% else %}
       <button class="btn" type="submit">♡ お気に入り追加</button>
     {% endif %}
-  </form>  
+  </form>
 </div>
 
 <hr style="margin:20px 0;">
 
-<h2>クチコミ({{ reviews|length }}件) </h2>
+<h2>クチコミ({{ reviews_count }}件)</h2>
+
 {% if user.is_authenticated %}
   <a class="btn" href="{% url 'spots:review_create' spot.pk %}">＋クチコミ投稿</a>
 {% else %}
   <a class="btn" href="{% url 'accounts:login' %}?next={% url 'spots:spot_detail' spot.pk %}">
     ログインしてクチコミ投稿
   </a>
-  <div class="muted" style="margin-top:6px;">※投稿するにはログインが必要です</div> 
+  <div class="muted" style="margin-top:6px;">※投稿するにはログインが必要です</div>
+{% endif %}
+
+{% if reviews %}
+  {% for r in reviews %}
+    <div style="background:#fff; padding:12px; border-radius:12px; margin-top:10px">
+      <div>
+        {{ r.user }} /
+        {% for i in "12345" %}
+          {% if forloop.counter <= r.rating %}
+            <span style="color:#f59e0b;">★</span>
+          {% else %}
+            <span style="color:#d1d5db;">☆</span>
+          {% endif %}
+        {% endfor %}
+      </div>
+      <div style="color:#555;">{{ r.comment }}</div>
+  
+    
+      {% if user.is_authenticated and r.user_id == user.id %}
+         <div style="margin-top:8px; display:flex; gap:8px;">
+           <a class="btn btn-sub" href="{% url 'spots:review_update' r.pk %}">編集</a>
+
+          <form method="post" action="{% url 'spots:review_delete' r.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-sub" type="submit" onclick="return confirm('削除しますか？');">削除</button>
+          </form>
+        </div>
+      {% endif %}
+
+    </div>
+  {% endfor %}
+{% else %}
+  <div style="background:#fff; padding:14px; border-radius:12px; margin-top:10px; border:1px dashed #ddd;">
+    <p style="margin:0 0 10px;">まだクチコミがありません。</p>
+{% if user.is_authenticated %}
+      <a class="btn" href="{% url 'spots:review_create' spot.pk %}">最初のクチコミを書く</a>
+    {% else %}
+      <a class="btn" href="{% url 'accounts:login' %}?next={% url 'spots:spot_detail' spot.pk %}">
+        ログインしてから最初のクチコミを書く
+      </a>
+    {% endif %}
+  </div>
   {% endif %}
 
-{% for r in reviews %}
-  <div style="background:#fff; padding:12px; border-radius:12px; margin-top:10px">
-    <div>
-      {{ r.user }} /
-      {% for i in "12345" %}
-        {% if forloop.coynter <= r.rating %}
-          <span style="color:#f59e0b;">★</span>
-        {% else %}
-          <span style="color:#d1d5db;">☆</span>
-        {% endif %}
-      {% endfor %}
-      <span class="muted" style="margin-left:8px;">(rating={{ r.rating }})</span>
-    </div>
-
-    <div style="color:#555;">{{ r.comment }}</div>
-  </div>
-{% empty %}
-  <p>まだクチコミがありません。</p>
-{% endfor %}
-
-    <div style="background:#fff; padding:14px; border-radius:12px; margin-top:10px; border:1px dashed #ddd;">
-      <p style="margin:0 0 10px;">まだクチコミがありません。　</p>
-      <a class="btn" href="{% url 'spots:review_create' spot.pk %}">最初のクチコミを書く</a>
-    </div>
 {% if avg_rating %}
-  <div style="margin-top:8px; color:#f59e0b;">
-    平均評価:{{ avg_rating|floatformat:1 }} ★
-  </div>
+  <div style="margin-top:10px;">
+    <strong>平均評価:</strong>
+    {% for i in "12345" %}
+      {% if forloop.counter <= avg_rating %}
+        <span style="color:#f59e0b;">★</span>
+      {% else %}
+        <span style="color:#d1d5db;">☆</span>
+      {% endif %}
+    {% endfor %}
+
+    <span class="muted" style="margin-left:6px;">
+      {{ avg_rating|floatformat:1 }}（{{ reviews_count }}件）
+    </span>
+
+{% if reviews_count > reviews|length %}
+  <a href="{% url 'spots:review_list' %}?spot={{ spot.id }}&sort={{ request.GET.sort|default:'new' }}">
+     style="font-size:14px; color:#2563eb; white-space:nowrap;">
+     クチコミを全て見る →
+  </a>
+{% endif %}
+</div>
 {% else %}
   <div style="margin-top:8px; color:#9ca3af;">
     まだ評価がありません
   </div>
 {% endif %}
+
 {% endblock %}

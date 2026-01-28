@@ -39,22 +39,40 @@
 
   <h2 style="margin: 0 0 10px;">結果</h2>
 
-  {% for spot in spots %}
-    <div style="padding: 12px 0;">
-      <a href="{% url 'spots:spot_detail' spot.pk %}" style="font-weight: 800; text-decoration: none;">
-        {{ spot.name }}
-      </a>
-      <div class="muted">{{ spot.address }}</div>
-      <div class="muted">言語: {{ spot.language }}</div>
+ <div class="wrap">
+  {% if spots %}
+    {% for s in spots %}
+      <div class="card">
+        <div class="row">
+          <div class="title">
+            <a href="{% url 'spots:spot_detail' s.pk %}">{{ s.name }}</a>
+          </div>
 
-      {% if spot.image %}
-         <div stale="magin-top:8px;">
-          <img src="{{ spot.image.url }}" alt="{{ spot.name }}" style="max-width:100%; border-radius:12px;">
+          {% if user.is_authenticated %}
+            <form method="post" action="{% url 'spots:favorite_toggle' s.pk %}">
+              {% csrf_token %}
+              <button class="btn btn-sub" type="submit">♡/☆</button>
+            </form>
+          {% endif %}
         </div>
-      {% endif %}
+
+        <div class="muted">住所：{{ s.address }}</div>
+
+        {% if s.language %}
+          <div class="muted">言語：{{ s.language }}</div>
+        {% endif %}
+
+        {% if s.image %}
+          <div style="margin-top:10px;">
+            <img src="{{ s.image.url }}" alt="{{ s.name }}"
+                 style="width:100%; height:180px; object-fit:cover; border-radius:14px;">
+          </div>
+        {% endif %}
       </div>
-    <hr style="margin: 0; border: none; border-top: 1px solid #e7e7e7;">
-  {% empty %}
-    <p class="muted">該当スポットがありません</p>
-  {% endfor %}
-{% endblock %}
+    {% endfor %}
+  {% else %}
+    <div class="card">
+      <p>該当スポットがありません</p>
+    </div>
+  {% endif %}
+</div>

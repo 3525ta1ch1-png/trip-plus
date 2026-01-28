@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}お気に入り一覧{% endblock %}
+{% block header_title %}お気に入り一覧{% endblock %}
+{% block header_action %}
+  <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">スポット一覧へ</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .wrap{max-width:900px;margin:0 auto;}
+  .card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);margin:12px 0;}
+  .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+  .title{font-weight:900;}
+  .muted{color:#6b7280;font-size:13px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  {% if favorites %}
+    {% for f in favorites %}
+      <div class="card">
+        <div class="row">
+          <div class="title">
+            <a href="{% url 'spots:spot_detail' f.spot.pk %}">{{ f.spot.name }}</a>
+          </div>
+
+          <form method="post" action="{% url 'spots:favorite_toggle' f.spot.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-sub" type="submit">☆ 解除</button>
+          </form>
+        </div>
+
+        <div class="muted">住所：{{ f.spot.address }}</div>
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="card">
+      <p>お気に入りがまだありません。</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
