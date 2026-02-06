@@ -1,33 +1,97 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Trip+ | Home{% endblock %}
-{% block header_title %}Trip+{% endblock %}
+{% block title %}ホーム{% endblock %}
+{% block header_title %}TRIP+{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+<style>
+  .page{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 14px;
+  }
+  .section-title{
+    font-weight: 700;
+    margin: 6px 0 12px;
+    color:#1d2b3a;
+  }
+
+  /* ===== おすすめ観光地カード ===== */
+  .recommend-card{
+    display:flex;
+    gap:14px;
+    align-items:stretch;
+    background:#fff;
+    border:1px solid #d7dbe0;
+    border-radius:12px;
+    padding:12px;
+    text-decoration:none;
+    color:inherit;
+    box-shadow:0 6px 16px rgba(0,0,0,0.06);
+  }
+
+  .recommend-thumb{
+    flex: 0 0 44%;
+    max-width: 44%;
+    border-radius:10px;
+    overflow:hidden;
+    background:#e9eef5;
+    aspect-ratio: 4 / 3;
+  }
+
+  .recommend-thumb img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+  }
+
+  .recommend-body{
+    flex: 1 1 auto;
+    padding-top: 4px;
+  }
+
+  .recommend-name{
+    font-size: 16px;
+    font-weight: 700;
+    margin: 2px 0 6px;
+  }
+
+  .recommend-address{
+    font-size: 13px;
+    color:#5b6672;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 520px){
+    .recommend-card{ flex-direction:column; }
+    .recommend-thumb{ flex:none; max-width:100%; }
+  }
+</style>
 {% endblock %}
 
 {% block content %}
-  <div class="section-title">● オススメ観光体験</div>
+<div class="page">
+  <div class="section-title">⭐オススメ観光スポット</div>
 
   {% if spot %}
-    <a class="recommend-card" href="{% url 'spots:spot_detail' spot.id %}">
-      <div class="recommend-image">
-        {% if spot.image_url %}
-          <img src="{{ spot.image_url }}" alt="おすすめスポット">
+    <a class="recommend-card" href="{% url 'spots:spot_detail' spot.pk %}">
+      <div class="recommend-thumb">
+        {% if spot.image %}
+          <img src="{{ spot.image.url }}" alt="{{ spot.name }}">
         {% else %}
-          <img src="{% static 'accounts/sample_spot.jpg' %}" alt="おすすめスポット">
+          <img src="{% static 'accounts/sample_spot.jpg' %}" alt="no image">
         {% endif %}
       </div>
 
-      <div class="recommend-info">
-        <div class="spot-name">{{ spot.name }}</div>
-        <div class="spot-address">{{ spot.address }}</div>
+      <div class="recommend-body">
+        <div class="recommend-name">{{ spot.name }}</div>
+        <div class="recommend-address">{{ spot.address|default:"" }}</div>
       </div>
     </a>
   {% else %}
-    <div class="muted">スポットがまだ登録されていません。</div>
-    <a class="btn" href="{% url 'spots:spot_create' %}">スポット登録へ</a>
+    <div class="muted">まだスポットが登録されていません</div>
   {% endif %}
+</div>
 {% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}近くのスポット検索画面 | Trip+{% endblock %}
+
+{% block content %}
+
+<h2>近くのスポット検索画面</h2>
+<div class="card">
+
+<div class="box">
+  <p>※該当するものにチェックを入れる／ない場合はワード検索欄に入力</p>
+
+  <form method="get" action="{% url 'spots:near_list' spot.id %}">
+    <fieldset>
+      <legend>ジャンル</legend>
+      <label><input type="checkbox" name="genre" value="gourmet"> 🍜グルメ</label>
+      <label><input type="checkbox" name="genre" value="sightseeing"> 🌲観光</label>
+      <label><input type="checkbox" name="genre" value="cafe"> ☕カフェ</label>
+      <label><input type="checkbox" name="genre" value="hotel"> 🏨ホテル</label>
+      <label><input type="checkbox" name="genre" value="shopping"> 🛍ショッピング</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>交通手段</legend>
+      <label><input type="radio" name="transport" value="car"> 🚙車</label>
+      <label><input type="radio" name="transport" value="train"> 🚃電車</label>
+      <label><input type="radio" name="transport" value="bike"> 🚲自転車</label>
+      <label><input type="radio" name="transport" value="walk"> 👟徒歩</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>移動時間（目安）</legend>
+      <label><input type="radio" name="time" value="10"> ⌛10分以内</label>
+      <label><input type="radio" name="time" value="30"> ⌚30分以内</label>
+      <label><input type="radio" name="time" value="60"> ⏰1時間以内</label>
+      <label><input type="radio" name="time" value="" checked> 該当なし</label>
+    </fieldset>
+
+    <div style="margin-top:12px;">
+      <label>ワード検索</label><br>
+      <input type="text" name="q" placeholder="例）非日常を感じられる温泉" style="width:60%;">
+      <button type="submit">検索</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

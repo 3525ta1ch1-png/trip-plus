@@ -1,0 +1,34 @@
+{% extends "base_portfolio.html" %}
+{% load static %}
+
+{% block title %}ポートフォリオ{% endblock %}
+
+{% block content %}
+  <div class="card">
+
+    <h1 class="hero-title">トラベルスケジュール</h1>
+
+    <div class="hero-images">
+      <img src="{% static 'accounts/portfolio/hero_1.jpg' %}" alt="アプリ画面1">
+      <img src="{% static 'accounts/portfolio/hero_2.jpg' %}" alt="アプリ画面2">
+    </div>
+
+    <p class="desc">
+      トラベルスケジュールは旅行に行きたい方が観光施設を選びながら簡単にスケジュールを組み立てられるアプリです。<br><br>
+      このアプリを使用することで、ユーザー同士で観光施設を登録・更新・評価して、誰でも簡単に自分だけの旅行プランを作成できます。
+    </p>
+
+    <div class="links">
+      <a class="link" href="{% static 'accounts/portfolio/proposal.pdf' %}" target="_blank" rel="noopener">企画書</a>
+      <a class="link" href="{% static 'accounts/portfolio/ui_design.pdf' %}" target="_blank" rel="noopener">画面設計図</a>
+      <a class="link" href="{% static 'accounts/portfolio/screen_flow.svg' %}" target="_blank" rel="noopener">画面遷移図</a>
+      <a class="link" href="{% static 'accounts/portfolio/er.svg' %}" target="_blank" rel="noopener">ER図</a>
+    </div>
+
+    <div class="cta">
+      <!-- ログイン画面へ飛ばす（＝アプリへ） -->
+      <a class="btn" href="{% url 'accounts:login' %}">アプリへ</a>
+    </div>
+
+  </div>
+{% endblock %}

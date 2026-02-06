@@ -2,19 +2,8 @@
 
 {% block title %}お気に入り一覧{% endblock %}
 {% block header_title %}お気に入り一覧{% endblock %}
-{% block header_action %}
-  <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">スポット一覧へ</a>
-{% endblock %}
+{% block header_action %}{% endblock %}
 
-{% block extra_css %}
-<style>
-  .wrap{max-width:900px;margin:0 auto;}
-  .card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);margin:12px 0;}
-  .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
-  .title{font-weight:900;}
-  .muted{color:#6b7280;font-size:13px;}
-</style>
-{% endblock %}
 
 {% block content %}
 <div class="wrap">

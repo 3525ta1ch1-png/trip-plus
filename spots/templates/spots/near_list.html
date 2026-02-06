@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}近くの体験スポット一覧{% endblock %}
+{% block header_title %}近くの体験スポット一覧{% endblock %}
+{% block header_action %}
+  <a class="btn" href="{% url 'spots:near_search' center.id %}?{{ request.GET.urlencode }}">条件を変える</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .wrap{max-width:980px;margin:0 auto;}
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:14px;
+    margin-top:14px;
+  }
+  @media (max-width: 900px){
+    .grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
+  }
+  @media (max-width: 520px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .card{
+    background:#fff;border:1px solid #eee;border-radius:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+    overflow:hidden;
+  }
+  .thumb{
+    width:100%;
+    height:170px;
+    object-fit:cover;
+    display:block;
+    background:#f3f4f6;
+  }
+  .body{padding:12px 12px 14px;}
+  .title{
+    font-weight:900;
+    font-size:15px;
+    margin:0 0 6px;
+    color:#111;
+    text-decoration:none;
+    display:inline-block;
+  }
+  .muted{color:#6b7280;font-size:13px;}
+  .row{display:flex;justify-content:space-between;align-items:center;gap:10px;}
+  .pill{
+    display:inline-block;
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#f3f4f6;
+    color:#374151;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+
+  <div class="card" style="padding:14px; margin-top:14px;">
+    <div class="muted">
+      基準スポット：<strong>{{ center.name }}</strong> ／ 半径：{{ radius_km }}km ／ 件数：{{ spots|length }}
+    </div>
+  </div>
+
+  <div class="grid">
+    {% for s in spots %}
+      <div class="card">
+
+        <a href="{% url 'spots:spot_detail' s.pk %}">
+          {% if s.image %}
+            <img class="thumb" src="{{ s.image.url }}" alt="{{ s.name }}">
+          {% else %}
+            <img class="thumb" src="{% static 'accounts/sample_spot.jpg' %}" alt="no image">
+          {% endif %}
+        </a>
+
+        <div class="body">
+          <div class="row">
+            <a class="title" href="{% url 'spots:spot_detail' s.pk %}">{{ s.name }}</a>
+
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'spots:favorite_toggle' s.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-sub" type="submit">♡</button>
+              </form>
+            {% endif %}
+          </div>
+
+          <div class="row" style="margin-top:6px;">
+            <div class="muted">住所：{{ s.address }}</div>
+            <span class="pill">{{ s.distance_km }}km</span>
+          </div>
+        </div>
+
+      </div>
+
+    {% empty %}
+      <div class="card" style="padding:16px;">
+        <p>条件に合う近くのスポットが見つかりませんでした。</p>
+
+        <a class="btn" href="{% url 'spots:near_search' center.id %}?{{ request.GET.urlencode }}">
+          検索画面に戻る
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

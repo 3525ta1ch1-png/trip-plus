@@ -1,9 +1,13 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}TRIP+{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'accounts/style.css' %}">
+
 
   {% block base_css %}
   <style>
@@ -13,12 +17,18 @@
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;}
     .title{font-size:20px;font-weight:800;}
     .btn{display:inline-block;background:#1f6feb;color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;border:none;cursor:pointer;}
+    .wrap{max-width:900px;margin:0 auto;}
+    .card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);margin:12px 0;}
+    .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
+    .title{font-weight:900;}
+    .stars{font-weight:900;}
+    .thumb{width:100%;height:180px;object-fit:cover;border-radius:14px;margin-bottom:10px;}
     .btn:hover{opacity:.92;}
     .btn-sub{background:#e5e7eb;color:#111;}
     .muted{color:#6b7280;font-size:13px;}
     input,textarea,select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid #ddd;outline:none;font-size:14px;background:#fff;}
     input:focus,textarea:focus,select:focus{border-color:#1f6feb;box-shadow:0 0 0 3px rgba(31,111,235,.15);}
-
+    
     .nav { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
     .nav a{
       text-decoration:none;
@@ -91,35 +101,44 @@
 </head>
 <body>
 
-<header>
-  <div class="container">
-    <div class="topbar">
+<header class="app-header">
+  <div class="container topbar ">
+    <div class="brand">
       <div class="title">{% block header_title %}TRIP+{% endblock %}</div>
       <div>{% block header_action %}{% endblock %}</div>
     </div>
 
-    <nav class="nav">
-      <a href="{% url 'accounts:portfolio' %}">ポートフォリオ</a>
-      <a href="{% url 'accounts:home' %}">ホーム</a>
-      <a href="{% url 'spots:spot_list'%}">スポット一覧</a>
+    <nav class="nav"> 
+      <a href="{% if user.is_authenticated %}{% url 'accounts:home' %}
+               {% else %}{% url 'accounts:landing' %}{% endif %}">ホーム</a>
       <a href="{% url 'spots:word_search' %}">ワード検索</a>
       <a href="{% url 'spots:spot_create' %}">スポット登録</a>
       <a href="{% url 'spots:review_list' %}">クチコミ一覧</a>
       <a href="{% url 'spots:review_pick_spot' %}">クチコミ投稿</a>
-      <a class="btn btn-sub" href="{% url 'spots:favorite_list' %}">お気に入り</a>
+      <a href="{% url 'spots:favorite_list' %}">お気に入り一覧</a>
 
       <div class="account-nav">
         <div class="dropdown">
-          <button class="nav-account-btn" id="accountBtn" type="button">アカウント ▼</button>
+          <button class="nav-account-btn" id="accountBtn" type="button">
+            {% if user.is_authenticated %}
+              アカウント ▼
+            {% else %}
+              ログイン ▼
+            {% endif %}
+          </button>
 
           <div class="dropdown-menu" id="accountMenu">
-            <a class="dropdown-item" href="{% url 'accounts:email_change' %}">メールアドレス変更</a>
-            <a class="dropdown-item" href="{% url 'accounts:password_change' %}">パスワード変更</a>
-
-            <form method="POST" action="{% url 'accounts:logout' %}">
-              {% csrf_token %}
-              <button type="submit" class="dropdown-item danger">ログアウト</button>
-            </form>
+            {% if user.is_authenticated %}
+              <a class="dropdown-item" href="{% url 'accounts:email_change' %}">メールアドレス変更</a>
+              <a class="dropdown-item" href="{% url 'accounts:password_change' %}">パスワード変更</a>
+              <form method="POST" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                 <button type="submit" class="dropdown-item danger">ログアウト</button>
+              </form>
+            {% else %}
+              <a class="dropdown-item" href="{% url 'accounts:login' %}">ログイン</a>
+              <a class="dropdown-item" href="{% url 'accounts:signup' %}">新規登録</a>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -127,7 +146,7 @@
   </div>
 </header>
 
-<main class="container">
+<main class="container page">
 
 {% if messages %}
   <div style="margin:12px 0;">

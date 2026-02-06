@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}絞り込み | TRIP+{% endblock %}
+{% block header_title %}絞り込み{% endblock %}
+{% block header_action %}
+  <a class="btn btn-sub" href="{% url 'spots:word_search' %}">検索へ戻る</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .wrap{max-width:900px;margin:0 auto;}
+  .panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
+  .lead{font-weight:900;font-size:18px;margin:0 0 6px;}
+  .muted{color:#6b7280;font-size:13px;}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+  .chip{
+    display:inline-flex;align-items:center;justify-content:center;
+    padding:10px 14px;border-radius:999px;
+    border:1px solid #e5e7eb;background:#f9fafb;
+    text-decoration:none;color:#111;font-weight:800;font-size:14px;
+  }
+  .chip:hover{opacity:.9}
+  .grid{display:grid;gap:12px;margin-top:14px;}
+  .two{display:grid;gap:12px;grid-template-columns:1fr 1fr;}
+  @media(max-width:700px){ .two{grid-template-columns:1fr;} }
+  .btn-wide{width:100%;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <div class="panel">
+    <p class="lead">候補が多すぎます（{{ count }}件）</p>
+    <div class="muted">もう少し絞り込んでみましょう。下の候補を押すか、条件を追加してください。</div>
+
+    <!-- ① ワンタップ候補（チップ） -->
+    {% if candidates %}
+      <div class="chips">
+        {% for c in candidates %}
+          {# 目的(purpose)を候補で上書きして再検索する例 #}
+          <a class="chip"
+             href="{% url 'spots:word_search' %}?mood={{ request.GET.mood }}&purpose={{ c }}&time_axis={{ request.GET.time_axis }}&language={{ request.GET.language }}">
+            {{ c }}
+          </a>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <hr style="margin:16px 0;border:none;border-top:1px solid #e7e7e7;">
+
+    <!-- ② 追加条件フォーム（既存のWordSearchFormをそのまま使う） -->
+    <form method="get" action="{% url 'spots:word_search' %}" class="grid">
+
+      <div class="two">
+        <div>
+          <div class="muted">{{ form.mood.label }}</div>
+          {{ form.mood }}
+        </div>
+
+        <div>
+          <div class="muted">{{ form.purpose.label }}</div>
+          {{ form.purpose }}
+        </div>
+      </div>
+
+      <div class="two">
+        <div>
+          <div class="muted">{{ form.time_axis.label }}</div>
+          {{ form.time_axis }}
+        </div>
+
+        <div>
+          <div class="muted">{{ form.language.label }}</div>
+          {{ form.language }}
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-wide">この条件で絞り込む</button>
+
+      <a class="btn btn-sub btn-wide" href="{% url 'spots:word_search' %}">
+        条件をリセット
+      </a>
+    </form>
+  </div>
+</div>
+{% endblock %}

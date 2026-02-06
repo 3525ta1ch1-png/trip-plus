@@ -2,28 +2,31 @@
 
 {% block title %}{% if mode == "update" %}スポット編集{% else %}スポット追加{% endif %}{% endblock %}
 {% block header_title %}{% if mode == "update" %}スポット編集{% else %}スポット追加{% endif %}{% endblock %}
-{% block header_action %}
-  <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">戻る</a>
-{% endblock %}
+{% block header_action %}{% endblock %}
 
 {% block extra_css %}
 <style>
-  .card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);border:1px solid #eee;}
-  .btns{display:flex;gap:10px;margin-top:14px;}
-  .field{margin-top:12px;}
-  label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:800;}
-  input, textarea, select{width:100%; padding:10px; border:1px solid #ddd; border-radius:10px;}
-  .errorlist{margin:6px 0 0; padding-left:18px; color:#dc2626;}
-  .preview{margin-top:8px;}
-  .preview img{max-width:100%; border-radius:12px;}
+  .form-wrap{max-width:720px;margin:0 auto;}
+  .form-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
+  .field{margin:14px 0;}
+  .label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:700;}
+  input[type="text"], input[type="url"], input[type="time"], textarea, select{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid #d1d5db; background:#fff;
+    font-size:15px; outline:none;
+  }
+  textarea{resize:vertical;}
+  input:focus, textarea:focus, select:focus{border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.15);}
+  .days{display:flex;flex-wrap:wrap;gap:10px; padding:10px 12px; border:1px solid #d1d5db; border-radius:10px;}
+  .days label{display:flex;gap:6px;align-items:center;font-size:14px;}
+  .time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:520px){.time-row{grid-template-columns:1fr;}}
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="card">
-  <div class="muted">スポット名と住所を入力してください</div>
+<div class="form-wrap">
 
-  <!-- ★ enctype を必ず追加 -->
   <form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
 
@@ -41,7 +44,6 @@
       {{ form.address.errors }}
     </div>
 
-    <!-- ★ image_url → image に変更 -->
     <div class="field">
       <label>画像</label>
       {{ form.image }}
@@ -58,31 +60,78 @@
       <label>気分</label>
       {{ form.mood }}
       {{ form.mood.errors }}
+      <div class="muted" style="margin-top:6px;">
+        例：リフレッシュ　ワクワク　癒し など
     </div>
 
     <div class="field">
       <label>目的</label>
       {{ form.purpose }}
       {{ form.purpose.errors }}
+      <div class="muted" style="margin-top:6px;">
+        例：温泉　カフェ　アウトドア　食べ歩き など
     </div>
 
     <div class="field">
-      <label>開始時間</label>
-      {{ form.start_at }}
-      {{ form.start_at.errors }}
-    </div>
+  <label>時間軸</label>
+  {{ form.time_axis }}
+  {{ form.time_axis.errors }}
+  <div class="muted" style="margin-top:6px;">
+    例：朝活　夜・深夜　日帰り　お盆 など
+  </div>
 
     <div class="field">
-      <label>終了時間</label>
-      {{ form.end_at }}
-      {{ form.end_at.errors }}
-    </div>
-
-    <div class="field">
-      <label>言語</label>
+      <label>ワード</label>
       {{ form.language }}
       {{ form.language.errors }}
+      <div class="muted" style="margin-top:6px;">
+        単語でフリーで入力
     </div>
+
+<div class="field">
+  <label>参考サイト(URL)</label>
+  {{ form.website }} {{ form.website.errors }}
+</div>
+
+<div class="field">
+  <label>電話番号</label>
+  {{ form.phone }} {{ form.phone.errors }}
+</div>
+
+<div class="field">
+  <label>営業日</label>
+  <div class="business-days">
+    {% for checkbox in form.business_days %}
+      <label class="day-item">
+        {{ checkbox.choice_label }}{{ checkbox.tag }}
+      </label>
+    {% endfor %}
+    {{ form.business_days.errors }}
+ </div>
+</div>
+
+<div class="field">
+  <label>営業時間</label>
+  <div class="time-row">
+    </div>
+      <div class="label" style="font-weight:600;color:#6b7280;">開始時間</div>
+      {{ form.open_time }} {{ form.open_time.errors }}
+    </div>
+    <div>
+      <div class="label" style="font-weight:600;color:#6b7280;">終了時間</div>
+    {{ form.close_time }}{{ form.close_time.errors }}
+  </div>
+ </div>
+</div>
+
+<div class="field">
+  <label>駐車場</label>
+  {{ form.parking }} {{ form.parking.errors }}
+</div>
+
+<div class="field">
+  <label>説明</label>
+  {{ form.description }} {{ form.description.errors }}
 
     <div class="btns">
       <button class="btn" type="submit">

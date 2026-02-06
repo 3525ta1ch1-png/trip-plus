@@ -1,3 +1,4 @@
+import math
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q, Avg, Count
@@ -7,6 +8,7 @@ from django.core.paginator import Paginator
 
 from .models import Spot, Review, Favorite
 from .forms import SpotForm, ReviewForm, WordSearchForm
+from decimal import Decimal
 
 @login_required
 def review_update(request, pk):
@@ -145,6 +147,10 @@ def spot_list(request):
     )
 
 
+from decimal import Decimal
+from django.shortcuts import get_object_or_404, render
+from django.db.models import Avg
+
 def spot_detail(request, pk):
     spot = get_object_or_404(Spot, pk=pk)
 
@@ -158,19 +164,31 @@ def spot_detail(request, pk):
         spot.reviews.select_related("user")
         .order_by("-rating", "-created_at")[:3]
     )
-    
+
     reviews_count = reviews_all.count()
     avg_rating = reviews.aggregate(avg=Avg("rating"))["avg"]
-    
+
+    # ✅ 追加：bbox をPython側で作る（テンプレの add を使わない）
+    bbox = None
+    if spot.latitude is not None and spot.longitude is not None:
+        d = Decimal("0.01")
+        bbox = {
+            "left": spot.longitude - d,
+            "bottom": spot.latitude - d,
+            "right": spot.longitude + d,
+            "top": spot.latitude + d,
+        }
+
     return render(
         request,
-        "spots/spot_detail.html", 
+        "spots/spot_detail.html",
         {
-            "spot": spot,                                          
+            "spot": spot,
             "is_favorited": is_favorited,
             "reviews": reviews,
             "reviews_count": reviews_count,
             "avg_rating": avg_rating,
+            "bbox": bbox,  # ✅ 追加
         },
     )
 
@@ -186,17 +204,25 @@ def spot_create(request):
 
     return render(request, "spots/spot_form.html", {"form": form, "mode": "create"})
 
-
 def word_search(request):
     form = WordSearchForm(request.GET or None)
-    spots = Spot.objects.order_by("-created_at")
+    spots = Spot.objects.none()
 
-    if form.is_valid():
-        mood = form.cleaned_data.get("mood", "").strip()
-        purpose = form.cleaned_data.get("purpose", "").strip()
-        start_at = form.cleaned_data.get("start_at")
-        end_at = form.cleaned_data.get("end_at")
-        language = form.cleaned_data.get("language", "").strip()
+    # ★検索したかどうか（GETが空なら結果は出さない）
+    has_query = any([
+        request.GET.get("mood"),
+        request.GET.get("purpose"),
+        request.GET.get("time_axis"),
+        request.GET.get("language"),
+    ])
+
+    if form.is_valid() and has_query:
+        mood = (form.cleaned_data.get("mood") or "").strip()
+        purpose = (form.cleaned_data.get("purpose") or "").strip()
+        time_axis = (form.cleaned_data.get("time_axis") or "").strip()
+        language = (form.cleaned_data.get("language") or "").strip()
+
+        spots = Spot.objects.all()
 
         if mood:
             spots = spots.filter(mood__icontains=mood)
@@ -204,19 +230,99 @@ def word_search(request):
             spots = spots.filter(purpose__icontains=purpose)
         if language:
             spots = spots.filter(language__icontains=language)
-        if start_at and end_at:
-            spots = spots.filter(start_at__lte=end_at, end_at__gte=start_at)
-        elif start_at:
-            spots = spots.filter(end_at__gte=start_at)
-        elif end_at:
-            spots = spots.filter(start_at__lte=end_at)
+        if time_axis:
+            spots = spots.filter(time_axis__icontains=time_axis)
 
-    spots = spots.annotate(
-        avg_rating=Avg("reviews__rating"),
-        reviews_count=Count("reviews")
-    ).order_by("-created_at")
-            
+        # 20件超えの判定（ここも検索時だけ）
+        count = spots.count()
+        if count > 2:
+            return render(request, "spots/word_search_refine.html", {
+                "form": form,
+                "count": count,
+                "candidates": ["温泉系", "カフェ", "自然"],
+            })
+
+        # ★ここでだけ annotate する（spots が必ず QuerySet）
+        spots = spots.annotate(
+            avg_rating=Avg("reviews__rating"),
+            reviews_count=Count("reviews"),
+        ).order_by("-created_at")
+
     return render(request, "spots/word_search.html", {"form": form, "spots": spots})
+
+def near_search(request, pk):
+    spot = get_object_or_404(Spot, pk=pk)
+    return render(request, "spots/near_search.html", {"spot": spot})
+
+def near_list(request, pk):
+    center = get_object_or_404(Spot, pk=pk)
+
+    # ざっくり：移動時間→半径(km)に変換（後で調整でOK）
+    time_map = {"10": 1.0, "30": 3.0, "60": 7.0}
+    radius_km = time_map.get(request.GET.get("time") or "", 5.0)  # 指定なしは5km例
+
+    genres = request.GET.getlist("genre")  # 複数チェック
+    transport = request.GET.get("transport") or ""
+    q = (request.GET.get("q") or "").strip()
+
+    qs = Spot.objects.exclude(pk=center.pk)
+
+    # 例：genreがSpot.genreに入ってる想定（あなたのモデルに合わせて変更）
+    if genres:
+        qs = qs.filter(genre__in=genres)
+
+    # 例：ワード検索（name/description/addressなど）
+    if q:
+        qs = qs.filter(
+            Q(name__icontains=q) |
+            Q(description__icontains=q) |
+            Q(address__icontains=q)
+        )
+
+    # DBで距離計算できない前提で、Python側で距離を付与して絞る
+    results = []
+    if center.latitude is not None and center.longitude is not None:
+        for s in qs:
+            if s.latitude is None or s.longitude is None:
+                continue
+            d = haversine_km(center.latitude, center.longitude, s.latitude, s.longitude)
+            if d <= radius_km:
+                s.distance_km = round(d, 2)
+                results.append(s)
+
+    # 近い順
+    results.sort(key=lambda x: x.distance_km)
+
+    context = {
+        "center": center,
+        "spots": results,
+        "radius_km": radius_km,
+        "genres": genres,
+        "transport": transport,
+        "q": q,
+    }
+    return render(request, "spots/near_list.html", context)
+
+
+def haversine_km(lat1, lon1, lat2, lon2):
+    R = 6371.0
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = (math.sin(dphi/2)**2
+         + math.cos(phi1)*math.cos(phi2)*math.sin(dlambda/2)**2)
+    return 2 * R * math.asin(math.sqrt(a))
+
+@login_required
+def spot_delete(request, pk):
+    spot = get_object_or_404(Spot, pk=pk)
+
+    if request.method == "POST":
+        spot.delete()
+        return redirect("spots:spot_list")
+
+    return render(request, "spots/spot_confirm_delete.html", {"spot": spot})
 
 @login_required
 def spot_update(request, pk):
@@ -230,15 +336,8 @@ def spot_update(request, pk):
     else:
         form = SpotForm(instance=spot)
 
-    return render(request, "spots/spot_form.html", {"form": form, "mode": "update", "spot": spot})
-
-@login_required
-def spot_delete(request, pk):
-    spot = get_object_or_404(Spot, pk=pk)
-
-    if request.method == "POST":
-        spot.delete()
-        return redirect("spots:spot_list")
-
-    return render(request, "spots/spot_confirm_delete.html", {"spot": spot})
-
+    return render(request, "spots/spot_form.html", {
+        "form": form,
+        "mode": "update",
+        "spot": spot,
+    })

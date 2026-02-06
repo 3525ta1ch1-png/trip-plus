@@ -15,6 +15,8 @@ urlpatterns = [
     path("<int:pk>/delete/", views.spot_delete, name="spot_delete"),
 
     path("word-search/", views.word_search, name="word_search"),
+    path("<int:pk>/near/search/", views.near_search, name="near_search"),
+    path("<int:pk>/near/", views.near_list, name="near_list"),
 
     path("reviews/", views.review_list, name="review_list"),
     path("reviews/new/", views.review_pick_spot, name="review_pick_spot"),

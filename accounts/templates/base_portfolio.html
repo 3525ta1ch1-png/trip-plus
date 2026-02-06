@@ -1,0 +1,126 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ポートフォリオ{% endblock %}</title>
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --blue:#1f6feb;
+      --blue-dark:#1d4ed8;
+    }
+
+    body{
+      margin:0;
+      font-family: system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .page{
+      min-height:100vh;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      padding:48px 18px;
+    }
+
+    .container{
+      width:100%;
+      max-width:900px;
+    }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:26px 22px;
+      box-shadow:0 10px 26px rgba(0,0,0,.06);
+    }
+
+    .desc{
+      font-size:20px;
+      line-height:1.9;
+      color:var(--muted);
+      margin:0 auto 26px;
+      max-width:760px;
+      text-align:center;
+      white-space:pre-line;
+    }
+
+    .links{
+      margin-top:10px;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:12px;
+    }
+
+    .link{
+      display:inline-block;
+      color:var(--blue-dark);
+      font-weight:800;
+      font-size:22px;
+      text-decoration:none;
+      letter-spacing:.02em;
+    }
+    .link:hover{ text-decoration:underline; }
+
+    .section-label{
+      margin-top:22px;
+      color:var(--muted);
+      font-size:13px;
+      font-weight:800;
+      text-align:center;
+    }
+
+    .btn{
+      display:inline-block;
+      background:#4b6b8a;       
+      color:#fff;
+      padding:16px 40px;
+      border-radius:12px;
+      text-decoration:none;
+      font-weight:900;
+      font-size:18px;
+      border:none;
+    }
+    .btn:hover{ filter:brightness(.95); }
+
+    .cta{
+      margin-top:24px;
+      display:flex;
+      justify-content:center;
+    }
+
+    .grid-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      justify-items:center;
+    }
+    @media (max-width:640px){
+      .desc{ font-size:16px; }
+      .link{ font-size:18px; }
+      .grid-2{ grid-template-columns:1fr; }
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+  <div class="page">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</body>
+</html>

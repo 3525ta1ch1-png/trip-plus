@@ -2,12 +2,14 @@
 
 
 # Create your views here.
+import random
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 
+from django.db.models import Avg, Count
 from spots.models import Spot, Favorite
 from .forms import SignupForm, EmailChangeForm
 
@@ -41,7 +43,8 @@ def signup(request):
     
 @login_required 
 def home(request):
-    spot = Spot.objects.order_by("-created_at").first()
+    spots = Spot.objects.all()
+    spot = random.choice(list(spots)) if spots.exists() else None
     return render(request, "accounts/home.html", {"spot": spot})
 
 @login_required
@@ -93,5 +96,12 @@ def logout_view(request):
     return redirect(settings.LOGIN_REDIRECT_URL)      # GETで来たらホームへ
 
 def portfolio(request):
-    return render(request, "portfolio.html")
-
+    return render(request, "accounts/portfolio.html", {
+        "proposal_url": "https://docs.google.com/document/d/1Riqf4yRCReR0ypdHptUp1Qnwj_8zE6EjGICylXLNTAs/edit?tab=t.0",
+        "design_url": "https://docs.google.com/presentation/d/1VDa8qDI3F5T16SDimrnSULDCvKqjrI-eMCOJvcKhuQE/edit",
+        "flow_url": "https://app.diagrams.net/#G1-pSxVzP3ZJNY7yg0DC7Gr4KQYcVul3Nv",
+        "er_url": "https://app.diagrams.net/#G1j4-zrC01Le3lSQRQZeEzzgMUGYMzuhDI",
+        "app_url": "/home/",   # or reverse("accounts:home")
+    })
+def landing(request):
+    return render(request, "accounts/portfolio.html")

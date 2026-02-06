@@ -18,13 +18,8 @@
     </div>
 
     <div>
-      <span class="muted">{{ form.start_at.label }}</span>
-      {{ form.start_at }}
-    </div>
-
-    <div>
-      <span class="muted">{{ form.end_at.label }}</span>
-      {{ form.end_at }}
+      <span class="muted">{{ form.time_axis.label }}</span>
+      {{ form.time_axis }}
     </div>
 
     <div>
@@ -39,40 +34,41 @@
 
   <h2 style="margin: 0 0 10px;">結果</h2>
 
- <div class="wrap">
-  {% if spots %}
-    {% for s in spots %}
-      <div class="card">
-        <div class="row">
-          <div class="title">
-            <a href="{% url 'spots:spot_detail' s.pk %}">{{ s.name }}</a>
+  <div class="wrap">
+    {% if spots %}
+      {% for s in spots %}
+        <div class="card">
+          <div class="row">
+            <div class="title">
+              <a href="{% url 'spots:spot_detail' s.pk %}">{{ s.name }}</a>
+            </div>
+
+            {% if user.is_authenticated %}
+              <form method="post" action="{% url 'spots:favorite_toggle' s.pk %}">
+                {% csrf_token %}
+                <button class="btn btn-sub" type="submit">♡/☆</button>
+              </form>
+            {% endif %}
           </div>
 
-          {% if user.is_authenticated %}
-            <form method="post" action="{% url 'spots:favorite_toggle' s.pk %}">
-              {% csrf_token %}
-              <button class="btn btn-sub" type="submit">♡/☆</button>
-            </form>
+          <div class="muted">住所：{{ s.address }}</div>
+
+          {% if s.language %}
+            <div class="muted">言語：{{ s.language }}</div>
+          {% endif %}
+
+          {% if s.image %}
+            <div style="margin-top:10px;">
+              <img src="{{ s.image.url }}" alt="{{ s.name }}"
+                   style="width:100%; height:180px; object-fit:cover; border-radius:14px;">
+            </div>
           {% endif %}
         </div>
-
-        <div class="muted">住所：{{ s.address }}</div>
-
-        {% if s.language %}
-          <div class="muted">言語：{{ s.language }}</div>
-        {% endif %}
-
-        {% if s.image %}
-          <div style="margin-top:10px;">
-            <img src="{{ s.image.url }}" alt="{{ s.name }}"
-                 style="width:100%; height:180px; object-fit:cover; border-radius:14px;">
-          </div>
-        {% endif %}
+      {% endfor %}
+    {% else %}
+      <div class="card">
+        <p>該当スポットがありません</p>
       </div>
-    {% endfor %}
-  {% else %}
-    <div class="card">
-      <p>該当スポットがありません</p>
-    </div>
-  {% endif %}
-</div>
+    {% endif %}
+  </div>
+{% endblock %}

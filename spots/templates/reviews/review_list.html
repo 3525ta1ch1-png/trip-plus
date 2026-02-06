@@ -2,20 +2,7 @@
 
 {% block title %}クチコミ一覧{% endblock %}
 {% block header_title %}クチコミ一覧{% endblock %}
-{% block header_action %}
-  <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">スポット一覧へ</a>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-  .wrap{max-width:900px;margin:0 auto;}
-  .card{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);margin:12px 0;}
-  .row{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;}
-  .title{font-weight:900;}
-  .muted{color:#6b7280;font-size:13px;}
-  .stars{font-weight:900;}
-</style>
-{% endblock %}
+{% block header_action %}{% endblock %}
 
 {% block content %}
 <div class="wrap">
@@ -27,55 +14,46 @@
       クチコミ一覧
     {% endif %}
   </h1>
-  
+
   {% if spot_id %}
     <div style="margin:8px 0;">
       <a class="btn btn-sub"
-        href="{% url 'spots:spot_detail' spot_id%}">
+         href="{% url 'spots:spot_detail' spot_id %}">
         ← スポット詳細へ戻る
       </a>
     </div>
   {% endif %}
 
+  <!-- 並び替え -->
   <div style="margin:12px 0; display:flex; gap:8px;">
-    <a class="btn sort-btn {% if sort == 'new' %}active{% endif %}"
-       href="?{% if spot %}spot={{ spot.id }}&{% endif %}sort=new">
-       新着順
-    </a>
-    <a class="btn sort-btn {% if sort == 'high' %}active{% endif %}"
-       href="?{% if spot %}spot={{ spot.id }}&{% endif %}sort=high">
-       評価が高い順
-    </a>
-    <a class="btn sort-btn {% if sort == 'low' %}active{% endif %}"
-       href="?{% if spot %}spot={{ spot.id }}&{% endif %}sort=low">
-       評価が低い順
-    </a>
+    <a class="btn btn-sub" href="?{% if spot_id %}spot={{ spot_id }}&{% endif %}sort=new">新着順</a>
+    <a class="btn btn-sub" href="?{% if spot_id %}spot={{ spot_id }}&{% endif %}sort=high">評価が高い順</a>
+    <a class="btn btn-sub" href="?{% if spot_id %}spot={{ spot_id }}&{% endif %}sort=low">評価が低い順</a>
   </div>
 
-  {% if reviews %}
-    {% for r in reviews %}
-      <div class="card">
-        <div class="row">
-          <div class="title">
-            <a href="{% url 'spots:spot_detail' r.spot.pk %}">
-              {{ r.spot.name }}
-            </a>
-          </div>
-          <div class="stars">★ {{ r.rating }}</div>
+  {% for r in reviews %}
+    <div class="card">
+      <div class="row">
+        <div class="title">
+          <a href="{% url 'spots:spot_detail' r.spot.pk %}">
+            {{ r.spot.name }}
+          </a>
         </div>
+        <div style="font-weight:900;">★ {{ r.rating }}</div>
+      </div>
 
-        <div class="muted">
-          投稿者: {{ r.user.username }} / {{ r.created_at|date:"Y-m-d H:i" }}
-        </div>
+      <div class="muted">
+        投稿者: {{ r.user.username }} / {{ r.created_at|date:"Y-m-d H:i" }}
+      </div>
 
-        <p style="margin-top:10px; white-space:pre-wrap;">{{ r.comment }}</p>
-        </div>
-    {% endfor %}
-  {% else %}
+      <p style="margin-top:10px; white-space:pre-wrap;">{{ r.comment }}</p>
+    </div>
+  {% empty %}
     <div class="card">
       <p>クチコミがまだありません。</p>
     </div>
-  {% endif %}
+  {% endfor %}
+
 </div>
 
 {% if page_obj.pagenator.num_pages > 1 %}
