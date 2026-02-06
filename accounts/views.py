@@ -92,7 +92,7 @@ def logout_view(request):
 
     if request.method == "POST":
         logout(request)
-        return redirect("login")  # ログイン画面へ戻す
+        return redirect("accounts:login")  # ログイン画面へ戻す
     return redirect(settings.LOGIN_REDIRECT_URL)      # GETで来たらホームへ
 
 def portfolio(request):
