@@ -1,6 +1,17 @@
 from django import forms
 from .models import Spot, Review
 
+
+# ⭐⭐⭐⭐⭐ 評価用の選択肢（← ここに置く）
+STAR_CHOICES = [
+    (5, "★★★★★"),
+    (4, "★★★★☆"),
+    (3, "★★★☆☆"),
+    (2, "★★☆☆☆"),
+    (1, "★☆☆☆☆"),
+]
+
+
 class SpotForm(forms.ModelForm):
 
     business_days = forms.MultipleChoiceField(
@@ -15,13 +26,10 @@ class SpotForm(forms.ModelForm):
             "name",
             "address",
             "phone",
-
-            # 🔽 追加4つ（ここに挿入）
             "mood",
             "purpose",
             "time_axis",
             "language",
-
             "business_days",
             "open_time",
             "close_time",
@@ -51,11 +59,8 @@ class SpotForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-textarea"}),
         }
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        # 既存データ（JSONのlist）をチェックボックスの初期値に
         if self.instance and self.instance.pk:
             self.fields["business_days"].initial = self.instance.business_days or []
 
@@ -63,13 +68,36 @@ class SpotForm(forms.ModelForm):
         return self.cleaned_data.get("business_days") or []
 
 
+# ⭐ クチコミ投稿フォーム（星プルダウン）
 class ReviewForm(forms.ModelForm):
+    rating = forms.ChoiceField(
+        label="評価",
+        choices=STAR_CHOICES
+    )
+
     class Meta:
         model = Review
         fields = ["rating", "comment"]
 
+
 class WordSearchForm(forms.Form):
-    mood = forms.CharField(required=False, label="気分",widget=forms.TextInput(attrs={"placeholder": "例：癒し、ワクワク",}),)
-    purpose = forms.CharField(required=False, label="目的",widget=forms.TextInput(attrs={"placeholder": "例：温泉、食べ歩き",}),)
-    time_axis = forms.CharField(required=False, label="時間軸",widget=forms.TextInput(attrs={"placeholder": "例：日帰り、朝活",}))
-    language = forms.CharField(required=False, label="ワード",widget=forms.TextInput(attrs={"placeholder": "単語でフリーで入力",}),)
+    mood = forms.CharField(
+        required=False,
+        label="気分",
+        widget=forms.TextInput(attrs={"placeholder": "例：癒し、ワクワク"})
+    )
+    purpose = forms.CharField(
+        required=False,
+        label="目的",
+        widget=forms.TextInput(attrs={"placeholder": "例：温泉、食べ歩き"})
+    )
+    time_axis = forms.CharField(
+        required=False,
+        label="時間軸",
+        widget=forms.TextInput(attrs={"placeholder": "例：日帰り、朝活"})
+    )
+    language = forms.CharField(
+        required=False,
+        label="ワード",
+        widget=forms.TextInput(attrs={"placeholder": "単語でフリーで入力"})
+    )

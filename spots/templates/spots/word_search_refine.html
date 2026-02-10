@@ -34,11 +34,9 @@
     <p class="lead">候補が多すぎます（{{ count }}件）</p>
     <div class="muted">もう少し絞り込んでみましょう。下の候補を押すか、条件を追加してください。</div>
 
-    <!-- ① ワンタップ候補（チップ） -->
     {% if candidates %}
       <div class="chips">
         {% for c in candidates %}
-          {# 目的(purpose)を候補で上書きして再検索する例 #}
           <a class="chip"
              href="{% url 'spots:word_search' %}?mood={{ request.GET.mood }}&purpose={{ c }}&time_axis={{ request.GET.time_axis }}&language={{ request.GET.language }}">
             {{ c }}
@@ -49,7 +47,6 @@
 
     <hr style="margin:16px 0;border:none;border-top:1px solid #e7e7e7;">
 
-    <!-- ② 追加条件フォーム（既存のWordSearchFormをそのまま使う） -->
     <form method="get" action="{% url 'spots:word_search' %}" class="grid">
 
       <div class="two">

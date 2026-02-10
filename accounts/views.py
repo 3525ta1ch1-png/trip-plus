@@ -92,8 +92,8 @@ def logout_view(request):
 
     if request.method == "POST":
         logout(request)
-        return redirect("accounts:login")  # ログイン画面へ戻す
-    return redirect(settings.LOGIN_REDIRECT_URL)      # GETで来たらホームへ
+        return redirect("accounts:login") 
+    return redirect(settings.LOGIN_REDIRECT_URL)    
 
 def portfolio(request):
     return render(request, "accounts/portfolio.html", {
@@ -101,7 +101,7 @@ def portfolio(request):
         "design_url": "https://docs.google.com/presentation/d/1VDa8qDI3F5T16SDimrnSULDCvKqjrI-eMCOJvcKhuQE/edit",
         "flow_url": "https://app.diagrams.net/#G1-pSxVzP3ZJNY7yg0DC7Gr4KQYcVul3Nv",
         "er_url": "https://app.diagrams.net/#G1j4-zrC01Le3lSQRQZeEzzgMUGYMzuhDI",
-        "app_url": "/home/",   # or reverse("accounts:home")
+        "app_url": "/home/", 
     })
 def landing(request):
     return render(request, "accounts/portfolio.html")

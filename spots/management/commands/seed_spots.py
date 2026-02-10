@@ -11,10 +11,9 @@ class Command(BaseCommand):
     help = "Seed default spots (create/update + optional images)"
 
     def handle(self, *args, **options):
-        # 画像置き場（任意）
+        
         images_dir = Path(settings.BASE_DIR) / "spots" / "seed_images"
 
-        # Spotモデルにそのフィールドがあるか確認（事故防止）
         field_names = {f.name for f in Spot._meta.get_fields() if hasattr(f, "name")}
 
         def put(d: dict, key: str, value):
@@ -230,13 +229,11 @@ class Command(BaseCommand):
                 defaults=defaults,
             )
 
-            # 画像（ImageFieldがあり、ファイルが存在する場合のみ反映）
             if "image" in field_names:
                 filename = s.get("image_filename")
                 if filename:
                     image_path = images_dir / filename
                     if image_path.exists():
-                        # 既存に画像が無い場合のみ入れる（毎回上書きしたいなら条件を外してOK）
                         if is_created or not getattr(obj, "image", None):
                             with open(image_path, "rb") as f:
                                 obj.image.save(filename, File(f), save=True)

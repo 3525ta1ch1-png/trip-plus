@@ -40,10 +40,8 @@
 {% block content %}
 <div class="detail-wrap">
 
-  <!-- 上段：左（画像+基本） / 右（基本情報） -->
   <div class="detail-layout">
 
-    <!-- 左：画像＋基本情報 -->
     <div class="card">
       {% if spot.image %}
         <img class="thumb" src="{{ spot.image.url }}" alt="{{ spot.name }}">
@@ -70,11 +68,9 @@
       </div>
     </div>
 
-    <!-- 右：基本情報（登録画面に近い項目で統一） -->
     <div class="card">
       <h2 style="margin:0 0 10px;">基本情報</h2>
 
-      {# 営業日の表示用：コード→日本語 #}
       {% with day_map="mon:月曜,tue:火曜,wed:水曜,thu:木曜,fri:金曜,sat:土曜,sun:日曜,holiday:年中無休,irregular:不定休"|cut:" " %}
       <table class="info-table">
         <tr><th>住所</th><td>{{ spot.address|default:"-" }}</td></tr>
@@ -97,7 +93,6 @@
           <th>営業日</th>
           <td>
             {% if spot.business_days %}
-              {# business_days が ["mon","tue"...] 形式の想定 #}
               {% for d in spot.business_days %}
                 {% if d == "mon" %}月曜
                 {% elif d == "tue" %}火曜
@@ -158,7 +153,6 @@
 
   <hr style="margin:20px 0;">
 
-  <!-- クチコミ -->
   <h2>クチコミ({{ reviews_count }}件)</h2>
 
   {% if user.is_authenticated %}

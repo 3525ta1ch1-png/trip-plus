@@ -76,7 +76,7 @@ def review_list(request):
 
 @login_required
 def review_pick_spot(request):
-    spots = Spot.objects.order_by("-created_at")
+    spots = Spot.objects.all().order_by("-id")
     return render(request, "reviews/review_pick_spot.html", {"spots": spots})
 
 @login_required
