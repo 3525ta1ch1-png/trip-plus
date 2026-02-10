@@ -101,6 +101,7 @@
 </head>
 <body>
 
+{% if user.is_authenticated %}
 <header class="app-header">
   <div class="container topbar ">
     <div class="brand">
@@ -146,6 +147,14 @@
   </div>
 </header>
 
+{% else %}
+<header class="auth-header">
+  <div class="container">
+    <div class="auth-logo">
+      <div class="auth-logo">TRIP+</div>
+    </div>
+  </header>
+{% endif %}
 <main class="container page">
 
 {% if messages %}
@@ -168,6 +177,7 @@
   {% block content %}{% endblock %}
 </main>
 
+{% if user.is_authenticated %}
 <script>
   const btn = document.getElementById("accountBtn");
   const menu = document.getElementById("accountMenu");
@@ -184,6 +194,6 @@
     });
   }
 </script>
-
+{% endif %}
 </body>
 </html>
