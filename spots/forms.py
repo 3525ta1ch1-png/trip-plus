@@ -1,8 +1,8 @@
 from django import forms
 from .models import Spot, Review
 
+SEP = "/"
 
-# ⭐⭐⭐⭐⭐ 評価用の選択肢（← ここに置く）
 STAR_CHOICES = [
     (5, "★★★★★"),
     (4, "★★★★☆"),
@@ -19,6 +19,18 @@ class SpotForm(forms.ModelForm):
         required=False,
         widget=forms.CheckboxSelectMultiple
     )
+
+    mood_2 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
+    mood_3 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
+
+    purpose_2 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
+    purpose_3 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
+
+    time_axis_2 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
+    time_axis_3 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
+
+    language_2 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
+    language_3 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
 
     class Meta:
         model = Spot
@@ -61,14 +73,50 @@ class SpotForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
         if self.instance and self.instance.pk:
-            self.fields["business_days"].initial = self.instance.business_days or []
+            def split3(val):
+                parts = [p.strip() for p in (val or "").split(SEP) if p.strip()]
+                parts += ["", "", ""]
+                return parts[:3]
+
+            m1,m2,m3 = split3(self.instance.mood)
+            p1,p2,p3 = split3(self.instance.purpose)
+            t1,t2,t3 = split3(self.instance.time_axis)
+            l1,l2,l3 = split3(self.instance.language)
+            self.fields["mood"].initial = m1
+            self.fields["mood_2"].initial = m2
+            self.fields["mood_3"].initial = m3
+
+            self.fields["purpose"].initial = p1
+            self.fields["purpose_2"].initial = p2
+            self.fields["purpose_3"].initial = p3
+
+            self.fields["time_axis"].initial = t1
+            self.fields["time_axis_2"].initial = t2
+            self.fields["time_axis_3"].initial = t3
+
+            self.fields["language"].initial = l1
+            self.fields["language_2"].initial = l2
+            self.fields["language_3"].initial = l3
+    def _join3(self, a, b, c):
+        parts = [x.strip() for x in [a, b, c] if x and x.strip()]
+        return SEP.join(parts)
+
+    def clean(self):
+        cleaned = super().clean()
+
+        cleaned["mood"] = self._join3(cleaned.get("mood"), cleaned.get("mood_2"), cleaned.get("mood_3"))
+        cleaned["purpose"] = self._join3(cleaned.get("purpose"), cleaned.get("purpose_2"), cleaned.get("purpose_3"))
+        cleaned["time_axis"] = self._join3(cleaned.get("time_axis"), cleaned.get("time_axis_2"), cleaned.get("time_axis_3"))
+        cleaned["language"] = self._join3(cleaned.get("language"), cleaned.get("language_2"), cleaned.get("language_3"))
+
+        return cleaned
 
     def clean_business_days(self):
         return self.cleaned_data.get("business_days") or []
 
 
-# ⭐ クチコミ投稿フォーム（星プルダウン）
 class ReviewForm(forms.ModelForm):
     rating = forms.ChoiceField(
         label="評価",

@@ -5,6 +5,7 @@
 import random
 from django.conf import settings
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
@@ -68,12 +69,13 @@ def email_change(request):
         if form.is_valid():
             request.user.email = form.cleaned_data["email"]
             request.user.save()
+
+            messages.success(request, "変更が完了しました。")
             return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = EmailChangeForm(initial={"email": request.user.email})
 
     return render(request, "accounts/email_change.html", {"form": form})
-
 @login_required
 def password_change(request):
     if request.method == "POST":
@@ -81,12 +83,13 @@ def password_change(request):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)
+
+            messages.success(request, "変更が完了しました。")
             return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = PasswordChangeForm(user=request.user)
 
     return render(request, "accounts/password_change.html", {"form": form})
-            
 @login_required
 def logout_view(request):
 

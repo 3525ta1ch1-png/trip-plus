@@ -59,6 +59,10 @@
     <div class="field">
       <label>気分</label>
       {{ form.mood }}
+      <div id="mood2" style="display:none; margin-top:8px;">{{ form.mood_2}}</div>
+      <div id="mood3" style="display:none; margin-top:8px;">{{ form.mood_3}}</div>
+      <button type="button" class="btn btn-gry" id="addMoodBtn">＋ 追加</button>
+
       {{ form.mood.errors }}
       <div class="muted" style="margin-top:6px;">
         例：リフレッシュ　ワクワク　癒し など
@@ -67,6 +71,9 @@
     <div class="field">
       <label>目的</label>
       {{ form.purpose }}
+      <div id="purpose2" style="display:none; margin-top:8px;">{{ form.purpose_2}}</div>
+      <div id="purpose3" style="display:none; margin-top:8px;">{{ form.purpose_3}}</div>
+      <button type="button" class="btn btn-gry" id="addPurposeBtn">＋ 追加</button>
       {{ form.purpose.errors }}
       <div class="muted" style="margin-top:6px;">
         例：温泉　カフェ　アウトドア　食べ歩き など
@@ -75,6 +82,9 @@
     <div class="field">
   <label>時間軸</label>
   {{ form.time_axis }}
+  <div id="time_axis2" style="display:none; margin-top:8px;">{{ form.time_axis_2}}</div>
+  <div id="time_axis3" style="display:none; margin-top:8px;">{{ form.time_axis_3}}</div>
+  <button type="button" class="btn btn-gry" id="addTime_axisBtn">＋ 追加</button>
   {{ form.time_axis.errors }}
   <div class="muted" style="margin-top:6px;">
     例：朝活　夜・深夜　日帰り　お盆 など
@@ -83,6 +93,9 @@
     <div class="field">
       <label>ワード</label>
       {{ form.language }}
+      <div id="language2" style="display:none; margin-top:8px;">{{ form.language_2}}</div>
+      <div id="language3" style="display:none; margin-top:8px;">{{ form.language_3}}</div>
+      <button type="button" class="btn btn-gry" id="addLanguageBtn">＋ 追加</button>
       {{ form.language.errors }}
       <div class="muted" style="margin-top:6px;">
         単語でフリーで入力

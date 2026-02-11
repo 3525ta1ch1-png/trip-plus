@@ -37,7 +37,6 @@ body{
     opacity: 0.9;
 }
 
-/* ===== Home UI ===== */
 .app-body{
   margin: 0;
   padding: 0;
@@ -47,7 +46,7 @@ body{
 
 .nav{
   height: 54px;
-  background: #6ea3e6; /* 画像っぽい青 */
+  background: #6ea3e6; 
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -190,7 +189,6 @@ body{
   line-height: 1.6;
 }
 
-/* modal */
 .modal-backdrop{
   position: fixed;
   inset: 0;
@@ -254,7 +252,6 @@ body{
   font-weight:700;
 }
 
-/* ===== Home: おすすめ体験スポット ===== */
 .spot-card{
   display: grid;
   grid-template-columns: 1fr;
@@ -307,8 +304,6 @@ body{
   border-radius: 12px;
   display: block;
 }
-
-/* ===== 営業日チェックボックスを横並びに ===== */
 
 .business-days ul{
   list-style: none;
@@ -388,7 +383,6 @@ body{ background:var(--bg); color:var(--text); }
 
 .page{ padding: 20px 0 40px; }
 
-/* 共通ボタン */
 .btn{
   display:inline-block;
   background: var(--brand);
@@ -404,10 +398,75 @@ body{ background:var(--bg); color:var(--text); }
 .btn-secondary{ background:#e9eefc; color:#163a7a; }
 .btn-secondary:hover{ background:#dbe6ff; }
 
-/* 検索フォームの箱 */
 .card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:16px;
   padding:16px;
+}
+
+.btn-gray{
+  background:#e5e7eb !important;
+  color:#111 !important;
+  border:1px solid #d1d5db !important;
+}
+.btn-gray:hover{ opacity:.9; }
+
+.modal-bg{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.35);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999;
+}
+
+.modal-card{
+  background:#fff;
+  border-radius:16px;
+  padding:28px;
+  width:360px;
+  text-align:center;
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+}
+
+.modal-text{
+  font-size:18px;
+  font-weight:700;
+  margin-bottom:16px;
+}
+
+.modal-backdrop{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal-backdrop.show{ display: flex; }
+
+.modal{
+  width: 360px;
+  background: #fff;
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #d7dbe0;
+}
+.modal-title{
+  font-weight: 700;
+  margin-bottom: 14px;
+  text-align:center;
+}
+.modal-actions{
+  display:flex;
+  justify-content:center;
+}
+
+.btn.danger{
+  background:#e53935;
+  color:#fff;
+  border:none;
 }

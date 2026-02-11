@@ -94,6 +94,8 @@
     .nav-account-btn:hover{
       background:#f1f5f9;
     }
+
+
   </style>
   {% endblock %}
 
@@ -132,10 +134,11 @@
             {% if user.is_authenticated %}
               <a class="dropdown-item" href="{% url 'accounts:email_change' %}">メールアドレス変更</a>
               <a class="dropdown-item" href="{% url 'accounts:password_change' %}">パスワード変更</a>
-              <form method="POST" action="{% url 'accounts:logout' %}">
+              <form id="logoutForm" method="POST" action="{% url 'accounts:logout' %}">
                 {% csrf_token %}
-                 <button type="submit" class="dropdown-item danger">ログアウト</button>
+                <button type="button" class="dropdown-item danger" id="logoutBtn">ログアウト</button>
               </form>
+
             {% else %}
               <a class="dropdown-item" href="{% url 'accounts:login' %}">ログイン</a>
               <a class="dropdown-item" href="{% url 'accounts:signup' %}">新規登録</a>
@@ -158,24 +161,35 @@
 <main class="container page">
 
 {% if messages %}
-  <div style="margin:12px 0;">
+<div class="modal-backdrop show">
+  <div class="modal">
     {% for message in messages %}
-      <div style="
-        background:#ecfeff;
-        border:1px solid #a5f3fc;
-        color:#0e7490;
-        padding:10px 12px;
-        border-radius:12px;
-        margin-bottom:8px;
-        ">
-         {{ message }}
-        </div>
-      {% endfor %}
+      <div class="modal-title">{{ message }}</div>
+    {% endfor %}
+
+    <div class="modal-actions">
+      <a class="btn active" href="{% url 'accounts:home' %}">ホームへ戻る</a>
     </div>
-  {% endif %}
+  </div>
+</div>
+{% endif %}
+
+
 
   {% block content %}{% endblock %}
 </main>
+{% if user.is_authenticated %}
+<div class="modal-backdrop" id="logoutModal">
+  <div class="modal">
+    <div class="modal-title">ログアウトしますか？</div>
+
+    <div class="modal-actions" style="justify-content:space-between;">
+      <button type="button" class="btn danger" id="logoutYes">はい</button>
+      <button type="button" class="btn btn-sub" id="logoutNo">いいえ</button>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 {% if user.is_authenticated %}
 <script>
@@ -191,6 +205,31 @@
       if (!e.target.closest(".dropdown")) {
         menu.classList.remove("open");
       }
+    });
+  }
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  const logoutModal = document.getElementById("logoutModal");
+  const logoutYes = document.getElementById("logoutYes");
+  const logoutNo = document.getElementById("logoutNo");
+  const logoutForm = document.getElementById("logoutForm");
+
+  if (logoutBtn && logoutModal && logoutYes && logoutNo && logoutForm) {
+    logoutBtn.addEventListener("click", () => {
+      logoutModal.classList.add("show");
+      menu?.classList.remove("open");
+    });
+
+    logoutNo.addEventListener("click", () => {
+      logoutModal.classList.remove("show");
+    });
+
+    logoutModal.addEventListener("click", (e) => {
+      if (e.target === logoutModal) logoutModal.classList.remove("show");
+    });
+
+    logoutYes.addEventListener("click", () => {
+      logoutForm.submit();
     });
   }
 </script>
