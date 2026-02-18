@@ -4,12 +4,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "dummy-key"
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "taichi3525.pythonanywhere.com",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://taichi3525.pythonanywhere.com",
 ]
 
 INSTALLED_APPS = [
@@ -64,7 +68,7 @@ TIME_ZONE = 'Asia/Tokyo'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"

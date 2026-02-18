@@ -147,10 +147,6 @@ def spot_list(request):
     )
 
 
-from decimal import Decimal
-from django.shortcuts import get_object_or_404, render
-from django.db.models import Avg
-
 def spot_detail(request, pk):
     spot = get_object_or_404(Spot, pk=pk)
 
@@ -168,7 +164,6 @@ def spot_detail(request, pk):
     reviews_count = reviews_all.count()
     avg_rating = reviews.aggregate(avg=Avg("rating"))["avg"]
 
-    # ✅ 追加：bbox をPython側で作る（テンプレの add を使わない）
     bbox = None
     if spot.latitude is not None and spot.longitude is not None:
         d = Decimal("0.01")
@@ -206,9 +201,7 @@ def spot_create(request):
 
 def word_search(request):
     form = WordSearchForm(request.GET or None)
-    spots = Spot.objects.none()
-
-    # ★検索したかどうか（GETが空なら結果は出さない）
+    spots = Spot.objects.no
     has_query = any([
         request.GET.get("mood"),
         request.GET.get("purpose"),
@@ -257,21 +250,21 @@ def near_search(request, pk):
 def near_list(request, pk):
     center = get_object_or_404(Spot, pk=pk)
 
-    # ざっくり：移動時間→半径(km)に変換（後で調整でOK）
     time_map = {"10": 1.0, "30": 3.0, "60": 7.0}
     radius_km = time_map.get(request.GET.get("time") or "", 5.0)  # 指定なしは5km例
 
-    genres = request.GET.getlist("genre")  # 複数チェック
+    genres = request.GET.getlist("genre") 
     transport = request.GET.get("transport") or ""
     q = (request.GET.get("q") or "").strip()
 
     qs = Spot.objects.exclude(pk=center.pk)
 
-    # 例：genreがSpot.genreに入ってる想定（あなたのモデルに合わせて変更）
     if genres:
-        qs = qs.filter(genre__in=genres)
+        cond = Q()
+        for g in genres:
+            cond |= Q(purpose__icontains=g)
+        qs = qs.filter(cond)
 
-    # 例：ワード検索（name/description/addressなど）
     if q:
         qs = qs.filter(
             Q(name__icontains=q) |
