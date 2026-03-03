@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.models import User
 
 from django.db.models import Avg, Count
 from spots.models import Spot, Favorite
@@ -17,24 +18,36 @@ from .forms import SignupForm, EmailChangeForm
 
 def login_view(request):
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
+        email = (request.POST.get("email") or "").strip()
+        password = request.POST.get("password") or ""
 
-        user = authenticate(request, username=username, password=password)
-
-        if user is not None:
-            login(request, user)
-            return redirect(settings.LOGIN_REDIRECT_URL)
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            messages.error(request, "メールアドレスまたはパスワードが違います。")
+            return render(request, "accounts/login.html")
         
+        auth_user = authenticate(request, username=user.username, password=password)
+        if auth_user is None:
+            messages.error(request, "メールアドレスまたはパスワードが違います。")
+            return render(request, "accounts/login.html")
+        
+        login(request, auth_user)
+        return redirect("accounts:home")
+    
     return render(request, "accounts/login.html")
 
-def signup(request):
 
+def signup(request):
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
+            email = form.cleaned_data["email"]
+
+            if User.objects.filter(email__iexact=email).exists():
+               messages.error(request, "このメールアドレスはすでに登録されています。")
+               return render(request, "accounts/signup.html", {"form": form})
             user = form.save(commit=False)
-            user.email = form.cleaned_data["email"]
+            user.email = email
             user.save()
             login(request, user)
             return redirect(settings.LOGIN_REDIRECT_URL)
@@ -65,17 +78,21 @@ def review_post(request):
 @login_required
 def email_change(request):
     if request.method == "POST":
-        form = EmailChangeForm(request.POST)
+        form = EmailChangeForm(request.POST, user=request.user)
         if form.is_valid():
-            request.user.email = form.cleaned_data["email"]
+            request.user.email = form.cleaned_data["new_email"]
             request.user.save()
-
-            messages.success(request, "変更が完了しました。")
-            return redirect(settings.LOGIN_REDIRECT_URL)
+            return render(
+                request,
+                "accounts/email_change_done.html",)
     else:
-        form = EmailChangeForm(initial={"email": request.user.email})
+        form = EmailChangeForm(user=request.user)
 
-    return render(request, "accounts/email_change.html", {"form": form})
+    return render(request, "accounts/email_change.html", {
+        "form": form,
+        "current_email": request.user.email,
+    })
+
 @login_required
 def password_change(request):
     if request.method == "POST":
@@ -85,7 +102,12 @@ def password_change(request):
             update_session_auth_hash(request, user)
 
             messages.success(request, "変更が完了しました。")
-            return redirect(settings.LOGIN_REDIRECT_URL)
+            return render(
+                request,
+                "accounts/password_change.html",
+                {"form": PasswordChangeForm(user=request.user)}
+            )
+        
     else:
         form = PasswordChangeForm(user=request.user)
 

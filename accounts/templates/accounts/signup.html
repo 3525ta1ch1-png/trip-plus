@@ -8,11 +8,40 @@
 
   <form method="post" style="max-width:520px;">
     {% csrf_token %}
-    {{ form.as_p }}
+
+    <div>
+      {{ form.username.label_tag }}
+      {{ form.username }}
+      {{ form.username.errors }}
+    </div>
+
+    <div>
+      {{ form.email.label_tag }}
+      {{ form.email }}
+      {{ form.email.errors }}
+    </div>
+
+    <div>
+      {{ form.password1.label_tag }}
+      {{ form.password1 }}
+      {{ form.password1.errors }}
+    </div>
+
+    <div>
+      {{ form.password2.label_tag }}
+      {{ form.password2 }}
+      {{ form.password2.errors }}
+    </div>
+
+    <div class="password-nate">
+      ※パスワードは半角英数字8文字以上64文字以内で入力してください。
+    </div>
+
     <button class="btn" type="submit">登録する</button>
   </form>
 
   <p style="margin-top:12px;">
     <a href="{% url 'accounts:login' %}">ログインはこちら</a>
   </p>
-{% endblock %}
+  {% endblock %}
+  

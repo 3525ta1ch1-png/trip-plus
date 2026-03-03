@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}変更完了{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width:520px;">
+  <h2 style="margin-top:0;">変更が完了しました。</h2>
+  <p class="muted">メールアドレスの変更を反映しました。</p>
+
+  <div style="margin-top:14px;">
+    <a class="btn" href="{% url 'accounts:home' %}">ホームへ戻る</a>
+  </div>
+</div>
+{% endblock %}

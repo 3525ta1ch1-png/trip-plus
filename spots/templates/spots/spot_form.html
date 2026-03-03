@@ -1,157 +1,467 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}{% if mode == "update" %}スポット編集{% else %}スポット追加{% endif %}{% endblock %}
-{% block header_title %}{% if mode == "update" %}スポット編集{% else %}スポット追加{% endif %}{% endblock %}
-{% block header_action %}{% endblock %}
+{% block title %}スポット登録 | TRIP+{% endblock %}
+{% block header_title %}スポット登録{% endblock %}
 
 {% block extra_css %}
 <style>
-  .form-wrap{max-width:720px;margin:0 auto;}
-  .form-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
-  .field{margin:14px 0;}
-  .label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:700;}
-  input[type="text"], input[type="url"], input[type="time"], textarea, select{
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid #d1d5db; background:#fff;
-    font-size:15px; outline:none;
+  .wrap{max-width:980px;margin:0 auto;}
+  .layout{display:grid;grid-template-columns:1.15fr 1fr;gap:16px;align-items:start;}
+  @media(max-width:900px){ .layout{grid-template-columns:1fr;} }
+
+  .panel{
+    background:#fff;border:1px solid #eee;border-radius:16px;
+    padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);
   }
-  textarea{resize:vertical;}
-  input:focus, textarea:focus, select:focus{border-color:#2563eb; box-shadow:0 0 0 3px rgba(37,99,235,.15);}
-  .days{display:flex;flex-wrap:wrap;gap:10px; padding:10px 12px; border:1px solid #d1d5db; border-radius:10px;}
-  .days label{display:flex;gap:6px;align-items:center;font-size:14px;}
-  .time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-  @media(max-width:520px){.time-row{grid-template-columns:1fr;}}
-  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+  .panel h3{margin:0 0 12px;font-size:16px;font-weight:900;}
+  .panel{ overflow: visible; }
+  .kw-head{ overflow: visible; }
+  .kw-title{ overflow: visible; }
+  .muted{color:#6b7280;font-size:12px;}
+
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-weight:800;font-size:13px;margin-bottom:6px;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;
+    background:#fff;box-sizing:border-box;
+  }
+  .field textarea{min-height:110px;resize:vertical;}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media(max-width:600px){ .two{grid-template-columns:1fr;} }
+
+  /* 右側（上下） */
+  .right{display:grid;gap:16px;}
+
+  /* checkbox（営業日）が縦に伸びすぎたら横並びに */
+  .days ul{display:flex;gap:10px;flex-wrap:wrap;list-style:none;padding:0;margin:0;}
+  .days li{display:flex;gap:6px;align-items:center;}
+
+  .kw-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .kw-title{font-weight:900;}
+  .btn-inline{
+    padding:8px 12px;border-radius:12px;border:1px solid #e5e7eb;
+    background:#f9fafb;font-weight:900;cursor:pointer;
+  }
+  .btn-inline[disabled]{opacity:.5;cursor:not-allowed;}
+
+  .actions-right-bottom{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:16px;
+  }
+
+  /* スマホ最適化 */
+  @media(max-width:900px){
+    .actions-right-bottom{
+      justify-content:stretch;
+    }
+    .actions-right-bottom .btn,
+    .actions-right-bottom .btn-sub,
+    .actions-right-bottom .btn-danger{
+      flex:1;
+    }
+  }
+
+  .btn{
+    padding:10px 14px;border-radius:12px;border:0;
+    background:#2563eb;color:#fff;font-weight:900;cursor:pointer;
+  }
+  .btn-sub{
+    padding:10px 14px;border-radius:12px;border:1px solid #e5e7eb;
+    background:#fff;font-weight:900;cursor:pointer;
+    text-decoration:none;color:#111;
+  }
+
+  .btn-danger{
+    padding:10px 14px;
+    border-radius:12px;
+    border:0;
+    font-weight:900;
+    cursor:pointer;
+    background:#dc2626; /* 赤 */
+    color:#fff;
+  }
+  .btn-danger:hover{opacity:.9;}
+
+  /* --- click式ツールチップ --- */
+  .tip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:18px;
+    height:18px;
+    border-radius:999px;
+    border:1px solid #d1d5db;
+    color:#6b7280;
+    font-size:12px;
+    font-weight:900;
+    cursor:pointer;
+    background:#fff;
+    position:relative;
+    margin-left:6px;
+  }
+
+  .tip-box{
+    position:absolute;
+    left:50%;
+    top:-8px;
+    transform:translate(-50%, -100%);
+    background:#111;
+    color:#fff;
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:700;
+    white-space:pre-wrap;
+    width:max-content;
+    max-width:260px;
+    box-shadow:0 10px 20px rgba(0,0,0,.2);
+    display:none;
+    z-index:100;
+  }
+  .tip.open .tip-box{display:block;}
+
+  .tip-box::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:-6px;
+    transform:translateX(-50%);
+    border:6px solid transparent;
+    border-top-color:#111;
+  }
+
+  /* --- 削除モーダル --- */
+  .modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;              /* ← JSでflexにする */
+    align-items:center;
+    justify-content:center;
+    padding:14px;
+    z-index:9999;
+  }
+  .modal-card{
+    width:min(460px, 100%);
+    background:#fff;
+    border-radius:16px;
+    border:1px solid #eee;
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+    padding:16px;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="form-wrap">
+<div class="wrap">
 
-  <form method="POST" enctype="multipart/form-data">
+  <script>
+  (function(){
+    // --- 追加ボタン（hiddenを外す） ---
+    function refreshGroup(group){
+      const block = document.querySelector(`.kw-block[data-group="${group}"]`);
+      if(!block) return;
+
+      const extras = block.querySelectorAll(".kw-extra");
+
+      // 編集時：値が入ってるextraは表示
+      extras.forEach(el => {
+        const input = el.querySelector("input, textarea, select");
+        const hasValue = input && input.value && input.value.trim().length > 0;
+        if(hasValue) el.hidden = false;
+      });
+
+      const addBtn = block.querySelector(".js-add");
+      const visibleCount = Array.from(extras).filter(el => !el.hidden).length;
+
+      if(addBtn){
+        addBtn.disabled = (visibleCount >= extras.length);
+      }
+    }
+
+    function addOne(group){
+      const block = document.querySelector(`.kw-block[data-group="${group}"]`);
+      if(!block) return;
+
+      const extras = block.querySelectorAll(".kw-extra");
+      const next = Array.from(extras).find(el => el.hidden);
+      if(next){
+        next.hidden = false;
+        const input = next.querySelector("input, textarea, select");
+        if(input) input.focus();
+      }
+      refreshGroup(group);
+    }
+
+    // 初期化
+    ["mood","purpose","time_axis","language"].forEach(refreshGroup);
+
+    // クリックイベント（追加 + ツールチップ）
+    document.addEventListener("click", function(e){
+      // 追加ボタン
+      const addBtn = e.target.closest(".js-add");
+      if(addBtn){
+        addOne(addBtn.dataset.group);
+        return;
+      }
+
+      // ツールチップ
+      const tip = e.target.closest(".js-tip");
+
+      // 他のツールチップを閉じる
+      document.querySelectorAll(".js-tip.open").forEach(el=>{
+        if(el !== tip) el.classList.remove("open");
+      });
+
+      if(tip){
+        tip.classList.toggle("open");
+        e.stopPropagation();
+      }else{
+        // 画面のどこかを押したら閉じる
+        document.querySelectorAll(".js-tip.open").forEach(el=>el.classList.remove("open"));
+      }
+    });
+  })();
+  </script>
+
+  <form method="post" enctype="multipart/form-data" novalidate>
     {% csrf_token %}
 
-    {{ form.non_field_errors }}
+    <div class="layout">
 
-    <div class="field">
-      <label>スポット名</label>
-      {{ form.name }}
-      {{ form.name.errors }}
-    </div>
+      <!-- 左：基本情報 -->
+      <section class="panel">
+        <h3>基本情報</h3>
 
-    <div class="field">
-      <label>住所</label>
-      {{ form.address }}
-      {{ form.address.errors }}
-    </div>
-
-    <div class="field">
-      <label>画像</label>
-      {{ form.image }}
-      {{ form.image.errors }}
-
-      {% if mode == "update" and spot.image %}
-        <div class="preview">
-          <img src="{{ spot.image.url }}" alt="現在の画像">
+        <div class="field">
+          <label>{{ form.name.label }}</label>
+          {{ form.name }}
+          {% if form.name.errors %}<div class="muted">{{ form.name.errors }}</div>{% endif %}
         </div>
-      {% endif %}
-    </div>
 
-    <div class="field">
-      <label>気分</label>
-      {{ form.mood }}
-      <div id="mood2" style="display:none; margin-top:8px;">{{ form.mood_2}}</div>
-      <div id="mood3" style="display:none; margin-top:8px;">{{ form.mood_3}}</div>
-      <button type="button" class="btn btn-gry" id="addMoodBtn">＋ 追加</button>
+        <div class="field">
+          <label>{{ form.address.label }}</label>
+          {{ form.address }}
+          {% if form.address.errors %}<div class="muted">{{ form.address.errors }}</div>{% endif %}
+        </div>
 
-      {{ form.mood.errors }}
-      <div class="muted" style="margin-top:6px;">
-        例：リフレッシュ　ワクワク　癒し など
-    </div>
+        <div class="field">
+          <label>{{ form.phone.label }}</label>
+          {{ form.phone }}
+          {% if form.phone.errors %}<div class="muted">{{ form.phone.errors }}</div>{% endif %}
+        </div>
 
-    <div class="field">
-      <label>目的</label>
-      {{ form.purpose }}
-      <div id="purpose2" style="display:none; margin-top:8px;">{{ form.purpose_2}}</div>
-      <div id="purpose3" style="display:none; margin-top:8px;">{{ form.purpose_3}}</div>
-      <button type="button" class="btn btn-gry" id="addPurposeBtn">＋ 追加</button>
-      {{ form.purpose.errors }}
-      <div class="muted" style="margin-top:6px;">
-        例：温泉　カフェ　アウトドア　食べ歩き など
-    </div>
+        <div class="field days">
+          <label>{{ form.business_days.label }}</label>
+          {{ form.business_days }}
+          {% if form.business_days.errors %}<div class="muted">{{ form.business_days.errors }}</div>{% endif %}
+        </div>
 
-    <div class="field">
-  <label>時間軸</label>
-  {{ form.time_axis }}
-  <div id="time_axis2" style="display:none; margin-top:8px;">{{ form.time_axis_2}}</div>
-  <div id="time_axis3" style="display:none; margin-top:8px;">{{ form.time_axis_3}}</div>
-  <button type="button" class="btn btn-gry" id="addTime_axisBtn">＋ 追加</button>
-  {{ form.time_axis.errors }}
-  <div class="muted" style="margin-top:6px;">
-    例：朝活　夜・深夜　日帰り　お盆 など
-  </div>
+        <div class="field">
+          <label>営業時間</label>
+          <div class="two">
+            <div>
+              <div class="muted" style="margin-bottom:4px;">開始</div>
+              {{ form.open_time }}
+              {% if form.open_time.errors %}<div class="muted">{{ form.open_time.errors }}</div>{% endif %}
+            </div>
+            <div>
+              <div class="muted" style="margin-bottom:4px;">終了</div>
+              {{ form.close_time }}
+              {% if form.close_time.errors %}<div class="muted">{{ form.close_time.errors }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
 
-    <div class="field">
-      <label>ワード</label>
-      {{ form.language }}
-      <div id="language2" style="display:none; margin-top:8px;">{{ form.language_2}}</div>
-      <div id="language3" style="display:none; margin-top:8px;">{{ form.language_3}}</div>
-      <button type="button" class="btn btn-gry" id="addLanguageBtn">＋ 追加</button>
-      {{ form.language.errors }}
-      <div class="muted" style="margin-top:6px;">
-        単語でフリーで入力
-    </div>
+        <div class="field">
+          <label>{{ form.parking.label }}</label>
+          {{ form.parking }}
+          {% if form.parking.errors %}<div class="muted">{{ form.parking.errors }}</div>{% endif %}
+        </div>
 
-<div class="field">
-  <label>参考サイト(URL)</label>
-  {{ form.website }} {{ form.website.errors }}
-</div>
+        <div class="field">
+          <label>{{ form.website.label }}</label>
+          {{ form.website }}
+          {% if form.website.errors %}<div class="muted">{{ form.website.errors }}</div>{% endif %}
+        </div>
+      </section>
 
-<div class="field">
-  <label>電話番号</label>
-  {{ form.phone }} {{ form.phone.errors }}
-</div>
+      <!-- 右：上=キーワード / 下=補足 -->
+      <div class="right">
 
-<div class="field">
-  <label>営業日</label>
-  <div class="business-days">
-    {% for checkbox in form.business_days %}
-      <label class="day-item">
-        {{ checkbox.choice_label }}{{ checkbox.tag }}
-      </label>
-    {% endfor %}
-    {{ form.business_days.errors }}
- </div>
-</div>
+        <section class="panel">
+          <h3>キーワード（最大3つまで）</h3>
 
-<div class="field">
-  <label>営業時間</label>
-  <div class="time-row">
-    </div>
-      <div class="label" style="font-weight:600;color:#6b7280;">開始時間</div>
-      {{ form.open_time }} {{ form.open_time.errors }}
-    </div>
-    <div>
-      <div class="label" style="font-weight:600;color:#6b7280;">終了時間</div>
-    {{ form.close_time }}{{ form.close_time.errors }}
-  </div>
- </div>
-</div>
+          <!-- 気分 -->
+          <div class="kw-block" data-group="mood">
+            <div class="kw-head">
+              <div class="kw-title">
+                気分
+                <span class="tip js-tip">?
+                  <span class="tip-box">入力例:
+リフレッシュ、ワクワク、癒しなど</span>
+                </span>
+              </div>
+              <button type="button" class="btn-inline js-add" data-group="mood">追加</button>
+            </div>
 
-<div class="field">
-  <label>駐車場</label>
-  {{ form.parking }} {{ form.parking.errors }}
-</div>
+            <div class="kw-inputs" id="kw-mood">
+              <div class="field">{{ form.mood }}</div>
+              <div class="field kw-extra" hidden data-field="mood_2">{{ form.mood_2 }}</div>
+              <div class="field kw-extra" hidden data-field="mood_3">{{ form.mood_3 }}</div>
+            </div>
+          </div>
 
-<div class="field">
-  <label>説明</label>
-  {{ form.description }} {{ form.description.errors }}
+          <hr style="margin:14px 0;border:none;border-top:1px solid #eee;">
 
-    <div class="btns">
-      <button class="btn" type="submit">
-        {% if mode == "update" %}更新する{% else %}登録する{% endif %}
-      </button>
-      <a class="btn btn-sub" href="{% url 'spots:spot_list' %}">キャンセル</a>
+          <!-- 目的 -->
+          <div class="kw-block" data-group="purpose">
+            <div class="kw-head">
+              <div class="kw-title">
+                目的
+                <span class="tip js-tip">?
+                  <span class="tip-box">入力例:
+温泉、カフェ、食べ歩き など</span>
+                </span>
+              </div>
+              <button type="button" class="btn-inline js-add" data-group="purpose">追加</button>
+            </div>
+
+            <div class="kw-inputs" id="kw-purpose">
+              <div class="field">{{ form.purpose }}</div>
+              <div class="field kw-extra" hidden data-field="purpose_2">{{ form.purpose_2 }}</div>
+              <div class="field kw-extra" hidden data-field="purpose_3">{{ form.purpose_3 }}</div>
+            </div>
+          </div>
+
+          <hr style="margin:14px 0;border:none;border-top:1px solid #eee;">
+
+          <!-- 時間軸 -->
+          <div class="kw-block" data-group="time_axis">
+            <div class="kw-head">
+              <div class="kw-title">
+                時間軸
+                <span class="tip js-tip">?
+                  <span class="tip-box">入力例:
+日帰り、朝活、年末年始 など</span>
+                </span>
+              </div>
+              <button type="button" class="btn-inline js-add" data-group="time_axis">追加</button>
+            </div>
+
+            <div class="kw-inputs" id="kw-time_axis">
+              <div class="field">{{ form.time_axis }}</div>
+              <div class="field kw-extra" hidden data-field="time_axis_2">{{ form.time_axis_2 }}</div>
+              <div class="field kw-extra" hidden data-field="time_axis_3">{{ form.time_axis_3 }}</div>
+            </div>
+          </div>
+
+          <hr style="margin:14px 0;border:none;border-top:1px solid #eee;">
+
+          <!-- 言葉（language）があるならここも追加枠として揃える -->
+          {% if form.language %}
+          <div class="kw-block" data-group="language">
+            <div class="kw-head">
+              <div class="kw-title">
+                言葉
+                <span class="tip js-tip">?
+                  <span class="tip-box">入力例:
+ひとり旅、穴場、映え、子連れ など</span>
+                </span>
+              </div>
+              <button type="button" class="btn-inline js-add" data-group="language">追加</button>
+            </div>
+
+            <div class="kw-inputs" id="kw-language">
+              <div class="field">{{ form.language }}</div>
+              {% if form.language_2 %}<div class="field kw-extra" hidden data-field="language_2">{{ form.language_2 }}</div>{% endif %}
+              {% if form.language_3 %}<div class="field kw-extra" hidden data-field="language_3">{{ form.language_3 }}</div>{% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+        </section>
+
+        <section class="panel">
+          <h3>補足情報</h3>
+
+          <div class="field">
+            <label>{{ form.image.label }}</label>
+            {{ form.image }}
+            {% if form.image.errors %}<div class="muted">{{ form.image.errors }}</div>{% endif %}
+          </div>
+
+          <div class="field" style="margin-bottom:0;">
+            <label>{{ form.description.label }}</label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="muted">{{ form.description.errors }}</div>{% endif %}
+          </div>
+
+          <div class="actions-right-bottom">
+            {% if mode == "update" %}
+              <button id="deleteBtn" type="button" class="btn-danger">削除</button>
+            {% endif %}
+
+            <a class="btn-sub" href="{% url 'spots:spot_list' %}">戻る</a>
+
+            <button class="btn" type="submit">
+              {% if mode == "update" %}更新{% else %}登録{% endif %}
+            </button>
+          </div>
+        </section>
+
+      </div>
     </div>
   </form>
+
+  {% if mode == "update" %}
+  <div id="deleteModal" class="modal-backdrop">
+    <div class="modal-card">
+      <h3 style="margin:0 0 8px;">スポットを削除しますか？</h3>
+      <p style="margin:0 0 14px;color:#6b7280;font-size:13px;">
+        この操作は取り消せません。
+      </p>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+        <button id="cancelDelete" type="button" class="btn-sub">キャンセル</button>
+
+        <form method="post" action="{% url 'spots:spot_delete' spot.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn" style="background:#ef4444;">削除する</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const btn = document.getElementById("deleteBtn");
+    const modal = document.getElementById("deleteModal");
+    const cancel = document.getElementById("cancelDelete");
+
+    if(!btn || !modal || !cancel) return;
+
+    btn.addEventListener("click", () => {
+      modal.style.display = "flex";
+    });
+
+    cancel.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    modal.addEventListener("click", (e) => {
+      if(e.target === modal) modal.style.display = "none";
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if(e.key === "Escape") modal.style.display = "none";
+    });
+  })();
+  </script>
+  {% endif %}
+
 </div>
 {% endblock %}

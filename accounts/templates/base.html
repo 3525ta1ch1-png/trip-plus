@@ -94,87 +94,121 @@
     .nav-account-btn:hover{
       background:#f1f5f9;
     }
-
+  .modal-backdrop{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;
+    align-items:center; justify-content:center;
+    padding:14px;
+    z-index:9999;
+  }
+  .modal-backdrop.show{
+    display:flex;
+  }
+  .modal-card{
+    width:min(460px, 100%);
+    background:#fff;
+    border-radius:16px;
+    border:1px solid #eee;
+    box-shadow:0 12px 30px rgba(0,0,0,.18);
+    padding:16px;
+  }
 
   </style>
   {% endblock %}
 
   {% block extra_css %}{% endblock %}
 </head>
+
 <body>
+{% with url_name=request.resolver_match.url_name %}
 
-{% if user.is_authenticated %}
-<header class="app-header">
-  <div class="container topbar ">
-    <div class="brand">
-      <div class="title">{% block header_title %}TRIP+{% endblock %}</div>
-      <div>{% block header_action %}{% endblock %}</div>
-    </div>
-
-    <nav class="nav"> 
-      <a href="{% if user.is_authenticated %}{% url 'accounts:home' %}
-               {% else %}{% url 'accounts:landing' %}{% endif %}">ホーム</a>
-      <a href="{% url 'spots:word_search' %}">ワード検索</a>
-      <a href="{% url 'spots:spot_create' %}">スポット登録</a>
-      <a href="{% url 'spots:review_list' %}">クチコミ一覧</a>
-      <a href="{% url 'spots:review_pick_spot' %}">クチコミ投稿</a>
-      <a href="{% url 'spots:favorite_list' %}">お気に入り一覧</a>
-
-      <div class="account-nav">
-        <div class="dropdown">
-          <button class="nav-account-btn" id="accountBtn" type="button">
-            {% if user.is_authenticated %}
-              アカウント ▼
-            {% else %}
-              ログイン ▼
-            {% endif %}
-          </button>
-
-          <div class="dropdown-menu" id="accountMenu">
-            {% if user.is_authenticated %}
-              <a class="dropdown-item" href="{% url 'accounts:email_change' %}">メールアドレス変更</a>
-              <a class="dropdown-item" href="{% url 'accounts:password_change' %}">パスワード変更</a>
-              <form id="logoutForm" method="POST" action="{% url 'accounts:logout' %}">
-                {% csrf_token %}
-                <button type="button" class="dropdown-item danger" id="logoutBtn">ログアウト</button>
-              </form>
-
-            {% else %}
-              <a class="dropdown-item" href="{% url 'accounts:login' %}">ログイン</a>
-              <a class="dropdown-item" href="{% url 'accounts:signup' %}">新規登録</a>
-            {% endif %}
-          </div>
-        </div>
+  {# 1) ログイン/新規登録は「ロゴだけヘッダー」 #}
+  {% if url_name == "login" or url_name == "signup" %}
+    <header class="auth-header">
+      <div class="container">
+        <div class="auth-logo">TRIP+</div>
       </div>
-    </nav>
-  </div>
-</header>
+    </header>
 
-{% else %}
-<header class="auth-header">
-  <div class="container">
-    <div class="auth-logo">
-      <div class="auth-logo">TRIP+</div>
-    </div>
-  </header>
-{% endif %}
+  {# 2) ログイン後（それ以外のページ）は「ナビ付きヘッダー」 #}
+  {% elif user.is_authenticated %}
+    <header class="site-header">
+      <div class="header-inner">
+        <div class="title">TRIP+</div>
+
+        <nav class="nav">
+          <a href="{% url 'accounts:home' %}">ホーム</a>
+          <a href="{% url 'spots:word_search' %}">ワード検索</a>
+          <a href="{% url 'spots:spot_create' %}">スポット登録</a>
+          <a href="{% url 'spots:review_spot_list' %}">クチコミ一覧</a>
+          <a href="{% url 'spots:favorite_list' %}">お気に入り一覧</a>
+
+          <div class="account-nav">
+            <div class="dropdown">
+              <button class="nav-account-btn" id="accountBtn" type="button">アカウント ▼</button>
+
+              <div class="dropdown-menu" id="accountMenu">
+                <a class="dropdown-item" href="{% url 'accounts:email_change' %}">メールアドレス変更</a>
+                <a class="dropdown-item" href="{% url 'accounts:password_change' %}">パスワード変更</a>
+
+                <form id="logoutForm" method="POST" action="{% url 'accounts:logout' %}">
+                  {% csrf_token %}
+                  <button type="button" class="dropdown-item danger" id="logoutBtn">ログアウト</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+  {# 3) 未ログインで login/signup 以外（landing等）は好きに #}
+  {% else %}
+    <header class="auth-header">
+      <div class="container">
+        <div class="auth-logo">TRIP+</div>
+      </div>
+    </header>
+  {% endif %}
+
+{% endwith %}
+
 <main class="container page">
 
 {% if messages %}
-<div class="modal-backdrop show">
-  <div class="modal">
-    {% for message in messages %}
-      <div class="modal-title">{{ message }}</div>
-    {% endfor %}
+  {% for message in messages %}
+    {% if message.tags == "error" %}
+      <div id="denyModal" class="modal-backdrop" style="display:flex;">
+        <div class="modal-card">
+          <h3 style="margin:0 0 8px;">編集できません</h3>
+          <p style="margin:0 0 14px;color:#6b7280;font-size:13px;">
+            {{ message }}
+          </p>
+          <div style="display:flex;justify-content:flex-end;">
+            <button id="denyClose" type="button" class="btn btn-sub">閉じる</button>
+          </div>
+        </div>
+      </div>
 
-    <div class="modal-actions">
-      <a class="btn active" href="{% url 'accounts:home' %}">ホームへ戻る</a>
-    </div>
-  </div>
-</div>
+      <script>
+        (function(){
+          const modal = document.getElementById("denyModal");
+          const btn = document.getElementById("denyClose");
+          if(btn){
+            btn.addEventListener("click", ()=> modal.style.display="none");
+          }
+          // 背景クリックで閉じる
+          if(modal){
+            modal.addEventListener("click", (e)=>{
+              if(e.target === modal) modal.style.display="none";
+            });
+          }
+        })();
+      </script>
+    {% endif %}
+  {% endfor %}
 {% endif %}
-
-
 
   {% block content %}{% endblock %}
 </main>

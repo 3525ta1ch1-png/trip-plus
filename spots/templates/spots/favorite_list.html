@@ -1,33 +1,161 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}お気に入り一覧{% endblock %}
+{% block title %}お気に入り一覧 | TRIP+{% endblock %}
 {% block header_title %}お気に入り一覧{% endblock %}
-{% block header_action %}{% endblock %}
 
+{% block extra_css %}
+<style>
+  .wrap{max-width:1100px;margin:0 auto;}
+  .panel{
+    background:#fff;border:1px solid #eee;border-radius:16px;
+    padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:16px;
+  }
+  @media(max-width:980px){
+    .grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
+  }
+  @media(max-width:560px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  .card{
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    overflow:hidden;
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+    min-height:270px;
+  }
+
+  .thumb{
+    width:100%;
+    height:150px;
+    object-fit:cover;
+    display:block;
+    background:#f3f4f6;
+  }
+
+  .body{
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
+  }
+
+  .head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .name{
+    font-weight:900;
+    font-size:15px;
+    line-height:1.2;
+    margin:0;
+    color:#111;
+  }
+
+  .addr{
+    font-size:12px;
+    color:#6b7280;
+    margin:0;
+    line-height:1.4;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+
+  /* ✅ 解除用ハート */
+  .fav-form{margin:0;}
+  .heart-btn{
+    border:0;
+    background:transparent;
+    cursor:pointer;
+    font-size:18px;
+    line-height:1;
+    padding:2px 4px;
+  }
+  .heart-btn:hover{transform:scale(1.08);}
+
+  /* 全体クリック */
+  .link{
+    text-decoration:none;
+    color:inherit;
+    display:block;
+  }
+
+  /* ページャ */
+  .pager{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:16px;}
+  .pager a{color:#2563eb;text-decoration:none;font-weight:800;}
+  .pager span{color:#6b7280;font-size:13px;}
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="wrap">
-  {% if favorites %}
-    {% for f in favorites %}
-      <div class="card">
-        <div class="row">
-          <div class="title">
-            <a href="{% url 'spots:spot_detail' f.spot.pk %}">{{ f.spot.name }}</a>
+  <div class="panel">
+
+    <h2 style="margin:0 0 12px;">お気に入り一覧</h2>
+
+    {% if favorites %}
+      <div class="grid">
+        {% for fav in favorites %}
+          {% with spot=fav.spot %}
+          <div class="card">
+
+            <a class="link" href="{% url 'spots:spot_detail' spot.pk %}">
+              {% if spot.image %}
+                <img class="thumb" src="{{ spot.image.url }}" alt="{{ spot.name }}">
+              {% else %}
+                <div class="thumb"></div>
+              {% endif %}
+            </a>
+
+            <div class="body">
+              <div class="head">
+                <a class="link" href="{% url 'spots:spot_detail' spot.pk %}">
+                  <p class="name">{{ spot.name }}</p>
+                </a>
+
+                <!-- ✅ クリックで解除 -->
+                <form class="fav-form" method="post" action="{% url 'spots:favorite_toggle' spot.pk %}">
+                  {% csrf_token %}
+                  <button class="heart-btn" type="submit" title="お気に入り解除" onclick="event.stopPropagation();">❤️</button>
+                </form>
+              </div>
+
+              <p class="addr">{{ spot.address|default:"-" }}</p>
+            </div>
+
           </div>
-
-          <form method="post" action="{% url 'spots:favorite_toggle' f.spot.pk %}">
-            {% csrf_token %}
-            <button class="btn btn-sub" type="submit">☆ 解除</button>
-          </form>
-        </div>
-
-        <div class="muted">住所：{{ f.spot.address }}</div>
+          {% endwith %}
+        {% endfor %}
       </div>
-    {% endfor %}
-  {% else %}
-    <div class="card">
-      <p>お気に入りがまだありません。</p>
-    </div>
-  {% endif %}
+
+      <div class="pager">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}">前へ</a>
+        {% endif %}
+        <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">次へ</a>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <p style="margin:0;">まだお気に入りがありません。</p>
+    {% endif %}
+
+  </div>
 </div>
 {% endblock %}

@@ -73,75 +73,89 @@
 
       {% with day_map="mon:月曜,tue:火曜,wed:水曜,thu:木曜,fri:金曜,sat:土曜,sun:日曜,holiday:年中無休,irregular:不定休"|cut:" " %}
       <table class="info-table">
-        <tr><th>住所</th><td>{{ spot.address|default:"-" }}</td></tr>
-        <tr><th>電話番号</th><td>{{ spot.phone|default:"-" }}</td></tr>
+  <tr><th>住所</th><td>{{ spot.address|default:"-" }}</td></tr>
+  <tr><th>電話番号</th><td>{{ spot.phone|default:"-" }}</td></tr>
 
-        <tr><th>カテゴリ</th><td>{{ spot.category|default:"-" }}</td></tr>
+  <tr>
+    <th>参考サイト</th>
+    <td>
+      {% if spot.website %}
+        <a href="{{ spot.website }}" target="_blank" rel="noopener">{{ spot.website }}</a>
+      {% else %}
+        -
+      {% endif %}
+    </td>
+  </tr>
 
-        <tr>
-          <th>参考サイト</th>
-          <td>
-            {% if spot.website %}
-              <a href="{{ spot.website }}" target="_blank" rel="noopener">{{ spot.website }}</a>
-            {% else %}
-              -
-            {% endif %}
-          </td>
-        </tr>
+  <tr>
+    <th>営業日</th>
+    <td>
+      {% if spot.business_days %}
+        {% for d in spot.business_days %}
+          {% if d == "mon" %}月曜
+          {% elif d == "tue" %}火曜
+          {% elif d == "wed" %}水曜
+          {% elif d == "thu" %}木曜
+          {% elif d == "fri" %}金曜
+          {% elif d == "sat" %}土曜
+          {% elif d == "sun" %}日曜
+          {% elif d == "holiday" %}年中無休
+          {% elif d == "irregular" %}不定休
+          {% else %}{{ d }}
+          {% endif %}
+          {% if not forloop.last %} / {% endif %}
+        {% endfor %}
+      {% else %}
+        -
+      {% endif %}
+    </td>
+  </tr>
 
-        <tr>
-          <th>営業日</th>
-          <td>
-            {% if spot.business_days %}
-              {% for d in spot.business_days %}
-                {% if d == "mon" %}月曜
-                {% elif d == "tue" %}火曜
-                {% elif d == "wed" %}水曜
-                {% elif d == "thu" %}木曜
-                {% elif d == "fri" %}金曜
-                {% elif d == "sat" %}土曜
-                {% elif d == "sun" %}日曜
-                {% elif d == "holiday" %}年中無休
-                {% elif d == "irregular" %}不定休
-                {% else %}{{ d }}
-                {% endif %}
-                {% if not forloop.last %} / {% endif %}
-              {% endfor %}
-            {% else %}
-              -
-            {% endif %}
-          </td>
-        </tr>
+  <tr>
+    <th>営業時間</th>
+    <td>
+      {% if spot.open_time and spot.close_time %}
+        {{ spot.open_time|time:"H:i" }}〜{{ spot.close_time|time:"H:i" }}
+      {% elif spot.open_time %}
+        {{ spot.open_time|time:"H:i" }}〜
+      {% elif spot.close_time %}
+        〜{{ spot.close_time|time:"H:i" }}
+      {% else %}
+        -
+      {% endif %}
+    </td>
+  </tr>
 
-        <tr>
-          <th>営業時間</th>
-          <td>
-            {% if spot.open_time or spot.close_time %}
-              {{ spot.open_time|default:"-" }}{% if spot.close_time %} - {{ spot.close_time }}{% endif %}
-            {% else %}
-              -
-            {% endif %}
-          </td>
-        </tr>
+  <tr><th>アクセス</th><td>{{ spot.access|default:"-" }}</td></tr>
 
-        <tr><th>アクセス</th><td>{{ spot.access|default:"-" }}</td></tr>
+  <tr>
+    <th>駐車場</th>
+    <td>
+      {% if spot.get_parking_display %}
+        {{ spot.get_parking_display|default:"-" }}
+      {% else %}
+        {{ spot.parking|default:"-" }}
+      {% endif %}
+    </td>
+  </tr>
 
-        <tr>
-          <th>駐車場</th>
-          <td>
-            {% if spot.get_parking_display %}
-              {{ spot.get_parking_display|default:"-" }}
-            {% else %}
-              {{ spot.parking|default:"-" }}
-            {% endif %}
-          </td>
-        </tr>
+  <tr><th>気分</th><td>{{ spot.mood|default:"-" }}</td></tr>
+  <tr><th>目的</th><td>{{ spot.purpose|default:"-" }}</td></tr>
+  <tr><th>時間軸</th><td>{{ spot.time_axis|default:"-" }}</td></tr>
+  <tr><th>ワード</th><td>{{ spot.language|default:"-" }}</td></tr>
 
-        <tr><th>気分</th><td>{{ spot.mood|default:"-" }}</td></tr>
-        <tr><th>目的</th><td>{{ spot.purpose|default:"-" }}</td></tr>
-        <tr><th>時間軸</th><td>{{ spot.time_axis|default:"-" }}</td></tr>
-        <tr><th>ワード</th><td>{{ spot.language|default:"-" }}</td></tr>
-      </table>
+  <!-- ✅ 追加：スポット登録のコメント欄（description）を表示 -->
+  <tr>
+    <th>コメント</th>
+    <td>
+      {% if spot.description %}
+        {{ spot.description|linebreaksbr }}
+      {% else %}
+        -
+      {% endif %}
+    </td>
+  </tr>
+</table>
       {% endwith %}
 
       <div class="muted" style="margin-top:10px;">
@@ -153,16 +167,61 @@
 
   <hr style="margin:20px 0;">
 
-  <h2>クチコミ({{ reviews_count }}件)</h2>
+<!-- ✅ クチコミ見出し行：左=件数 右=投稿ボタン -->
+<div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+  <h2 style="margin:0;">クチコミ（{{ reviews_count }}件）</h2>
 
   {% if user.is_authenticated %}
     <a class="btn" href="{% url 'spots:review_create' spot.pk %}">＋クチコミ投稿</a>
   {% else %}
     <a class="btn" href="{% url 'accounts:login' %}?next={% url 'spots:spot_detail' spot.pk %}">
-      ログインしてクチコミ投稿
+      ログインして投稿
     </a>
-    <div class="muted" style="margin-top:6px;">※投稿するにはログインが必要です</div>
   {% endif %}
+</div>
+
+<!-- ✅ サブ見出し行：左=最新のクチコミ 右=全て見る -->
+<div style="display:flex; align-items:center; gap:16px; margin-top:10px; flex-wrap:wrap;">
+  <div style="font-weight:900;">最新のクチコミ</div>
+  <a href="{% url 'spots:review_list' %}?spot={{ spot.pk }}"
+   style="font-weight:900; text-decoration:underline;">
+    クチコミを全て見る
+  </a>
+</div>
+
+{% if reviews %}
+  {% for r in reviews %}
+    <div style="background:#fff; padding:12px; border-radius:12px; margin-top:10px; border:1px solid #eee;">
+      <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+        <div>
+          {% for i in "12345" %}
+            {% if forloop.counter <= r.rating %}
+              <span style="color:#f59e0b;">★</span>
+            {% else %}
+              <span style="color:#d1d5db;">☆</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div style="color:#6b7280; font-size:12px;">
+          {{ r.user }} ・ {{ r.created_at|date:"Y/m/d" }}
+        </div>
+      </div>
+
+      <div style="color:#555; margin-top:6px;">{{ r.comment }}</div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div style="background:#fff; padding:14px; border-radius:12px; margin-top:10px; border:1px dashed #ddd;">
+    <p style="margin:0 0 10px;">まだクチコミがありません。</p>
+    {% if user.is_authenticated %}
+      <a class="btn" href="{% url 'spots:review_create' spot.pk %}">最初のクチコミを書く</a>
+    {% else %}
+      <a class="btn" href="{% url 'accounts:login' %}?next={% url 'spots:spot_detail' spot.pk %}">
+        ログインしてから最初のクチコミを書く
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
 
   {% if reviews %}
     {% for r in reviews %}
@@ -180,15 +239,13 @@
 
         <div style="color:#555; margin-top:6px;">{{ r.comment }}</div>
 
-        {% if user.is_authenticated and r.user_id == user.id %}
-          <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
-            <a class="btn btn-sub" href="{% url 'spots:review_update' r.pk %}">編集</a>
+        {% if user.is_authenticated and spot.created_by_id == user.id %}
+          <a href="{% url 'spots:spot_update' spot.pk %}">編集</a>
 
-            <form method="post" action="{% url 'spots:review_delete' r.pk %}">
-              {% csrf_token %}
-              <button class="btn btn-sub" type="submit" onclick="return confirm('削除しますか？');">削除</button>
-            </form>
-          </div>
+          <form method="post" action="{% url 'spots:spot_delete' spot.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-sub" type="submit">削除</button>
+          </form>
         {% endif %}
       </div>
     {% endfor %}
@@ -217,14 +274,6 @@
       src="https://www.openstreetmap.org/export/embed.html?bbox={{ bbox.left }},{{ bbox.bottom }},{{ bbox.right }},{{ bbox.top }}&layer=mapnik&marker={{ spot.latitude }},{{ spot.longitude }}">
     </iframe>
 
-    <div style="margin-top:8px;">
-      <a class="btn btn-sub"
-         target="_blank"
-         rel="noopener"
-         href="https://www.openstreetmap.org/?mlat={{ spot.latitude }}&mlon={{ spot.longitude }}#map=16/{{ spot.latitude }}/{{ spot.longitude }}">
-        大きい地図で見る
-      </a>
-    </div>
   </div>
 {% else %}
   <div style="margin-top:18px; color:#6b7280;">

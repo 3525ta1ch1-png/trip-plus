@@ -4,6 +4,12 @@ from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 
 class Spot(models.Model):
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="spots",
+        null=True, blank=True,
+    )
 
     BUSINESS_DAY_CHOICES = [
         ("mon", "月曜"),
@@ -48,6 +54,7 @@ class Spot(models.Model):
     description = models.TextField(blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    
 
     def __str__(self):
         return self.name

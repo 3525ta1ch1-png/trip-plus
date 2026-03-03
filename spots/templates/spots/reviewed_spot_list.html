@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}クチコミ一覧{% endblock %}
+{% block header_title %}クチコミ一覧{% endblock %}
+{% block header_action %}{% endblock %}
+
+{% block extra_css %}
+<style>
+  .wrap{max-width:1100px;margin:0 auto;}
+  .panel{
+    background:#fff;border:1px solid #eee;border-radius:16px;
+    padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);
+  }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:16px;
+  }
+  @media(max-width:980px){ .grid{grid-template-columns:repeat(2, 1fr);} }
+  @media(max-width:560px){ .grid{grid-template-columns:1fr;} }
+
+  .card{
+    border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;background:#fff;
+    text-decoration:none;color:inherit;
+  }
+  .thumb{width:100%;height:150px;object-fit:cover;display:block;background:#f3f4f6;}
+  .body{padding:12px;}
+  .name{margin:0;font-weight:900;font-size:15px;color:#111;}
+  .addr{margin:6px 0 0;color:#6b7280;font-size:12px;line-height:1.4;}
+  .meta{margin-top:8px;color:#374151;font-size:12px;display:flex;gap:10px;flex-wrap:wrap;}
+
+  .pager{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:16px;}
+  .pager a{color:#2563eb;text-decoration:none;font-weight:800;}
+  .pager span{color:#6b7280;font-size:13px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <div class="panel">
+    <h2 style="margin:0 0 14px;">クチコミしたスポット</h2>
+
+    {% if spots %}
+      <div class="grid">
+        {% for spot in spots %}
+          {# ✅ クリックで「そのスポットのクチコミ一覧」へ #}
+          <a class="card" href="{% url 'spots:review_list' %}?spot={{ spot.pk }}">
+
+            {% if spot.image %}
+              <img class="thumb" src="{{ spot.image.url }}" alt="{{ spot.name }}">
+            {% else %}
+              <div class="thumb"></div>
+            {% endif %}
+
+            <div class="body">
+              <p class="name">{{ spot.name }}</p>
+              <p class="addr">{{ spot.address|default:"-" }}</p>
+
+              <div class="meta">
+                <span>クチコミ {{ spot.reviews_count|default:0 }}件</span>
+              </div>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+
+      <div class="pager">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}">前へ</a>
+        {% endif %}
+        <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">次へ</a>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <p style="margin:0;">まだクチコミしたスポットがありません。</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

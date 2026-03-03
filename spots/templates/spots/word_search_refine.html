@@ -1,83 +1,107 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}絞り込み | TRIP+{% endblock %}
-{% block header_title %}絞り込み{% endblock %}
-{% block header_action %}
-  <a class="btn btn-sub" href="{% url 'spots:word_search' %}">検索へ戻る</a>
-{% endblock %}
+{% block title %}ワード検索絞り込み | TRIP+{% endblock %}
+{% block header_title %}ワード検索{% endblock %}
 
 {% block extra_css %}
 <style>
   .wrap{max-width:900px;margin:0 auto;}
-  .panel{background:#fff;border:1px solid #eee;border-radius:16px;padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
-  .lead{font-weight:900;font-size:18px;margin:0 0 6px;}
-  .muted{color:#6b7280;font-size:13px;}
-  .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
-  .chip{
-    display:inline-flex;align-items:center;justify-content:center;
-    padding:10px 14px;border-radius:999px;
-    border:1px solid #e5e7eb;background:#f9fafb;
-    text-decoration:none;color:#111;font-weight:800;font-size:14px;
+  .panel{
+    background:#fff;border:1px solid #eee;border-radius:16px;
+    padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);
   }
-  .chip:hover{opacity:.9}
-  .grid{display:grid;gap:12px;margin-top:14px;}
-  .two{display:grid;gap:12px;grid-template-columns:1fr 1fr;}
-  @media(max-width:700px){ .two{grid-template-columns:1fr;} }
-  .btn-wide{width:100%;}
+  .note{font-size:13px; color:#374151; line-height:1.7; margin:0 0 12px;}
+  .note small{color:#6b7280;}
+
+  .row{display:grid; grid-template-columns:140px 1fr; gap:12px; align-items:center; margin:14px 0;}
+  .label{font-weight:900; color:#111;}
+
+  .input{
+    width:100%; padding:10px 12px;
+    border:1px solid #e5e7eb; border-radius:12px;
+    box-sizing:border-box;
+  }
+
+  /* 検索候補を横並び・左寄せ */
+  .cand-list{
+    display:flex;
+    gap:18px;
+    align-items:center;
+    justify-content:flex-start;
+    flex-wrap:wrap;
+  }
+  .cand-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:800;
+    color:#111;
+    white-space:nowrap;
+  }
+
+  .actions{display:flex; justify-content:flex-end; margin-top:14px;}
+  .btn{
+    padding:10px 16px;border-radius:12px;border:0;
+    background:#2563eb;color:#fff;font-weight:900;cursor:pointer;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="wrap">
   <div class="panel">
-    <p class="lead">候補が多すぎます（{{ count }}件）</p>
-    <div class="muted">もう少し絞り込んでみましょう。下の候補を押すか、条件を追加してください。</div>
 
-    {% if candidates %}
-      <div class="chips">
-        {% for c in candidates %}
-          <a class="chip"
-             href="{% url 'spots:word_search' %}?mood={{ request.GET.mood }}&purpose={{ c }}&time_axis={{ request.GET.time_axis }}&language={{ request.GET.language }}">
-            {{ c }}
-          </a>
-        {% endfor %}
-      </div>
-    {% endif %}
+    <p class="note">
+      ※検索候補数が20件以上のため、さらに条件を絞り込んでください。<br>
+      候補から選ぶか、下の「ワード検索」にフリーで入力してください。<br>
+      <small>（現在の候補数：{{ count }}件）</small>
+    </p>
 
-    <hr style="margin:16px 0;border:none;border-top:1px solid #e7e7e7;">
+    <form method="get" action="{% url 'spots:word_search_results' %}">
 
-    <form method="get" action="{% url 'spots:word_search' %}" class="grid">
+      <!-- 元の検索条件を引き継ぐ（重要） -->
+      <input type="hidden" name="mood" value="{{ request.GET.mood }}">
+      <input type="hidden" name="purpose" value="{{ request.GET.purpose }}">
+      <input type="hidden" name="time_axis" value="{{ request.GET.time_axis }}">
+      <input type="hidden" name="language" value="{{ request.GET.language }}">
 
-      <div class="two">
+      <!-- 画面表示している search_word も送る（重要） -->
+      <input type="hidden" name="search_word" value="{{ search_word }}">
+
+      <!-- 検索ワード（前画面の入力を表示） -->
+      <div class="row">
+        <div class="label">検索ワード</div>
         <div>
-          <div class="muted">{{ form.mood.label }}</div>
-          {{ form.mood }}
-        </div>
-
-        <div>
-          <div class="muted">{{ form.purpose.label }}</div>
-          {{ form.purpose }}
+          <input class="input" type="text" value="{{ search_word }}" readonly>
         </div>
       </div>
 
-      <div class="two">
-        <div>
-          <div class="muted">{{ form.time_axis.label }}</div>
-          {{ form.time_axis }}
-        </div>
-
-        <div>
-          <div class="muted">{{ form.language.label }}</div>
-          {{ form.language }}
+      <!-- 検索候補 -->
+      <div class="row">
+        <div class="label">検索候補</div>
+        <div class="cand-list">
+          {% for c in candidates %}
+            <label class="cand-item">
+              <input type="radio" name="candidate" value="{{ c }}">
+              {{ c }}
+            </label>
+          {% endfor %}
         </div>
       </div>
 
-      <button type="submit" class="btn btn-wide">この条件で絞り込む</button>
+      <!-- ワード検索（自由入力） -->
+      <div class="row">
+        <div class="label">ワード検索</div>
+        <div>
+          <input class="input" type="text" name="free_word" placeholder="例）非日常を感じられる温泉">
+        </div>
+      </div>
 
-      <a class="btn btn-sub btn-wide" href="{% url 'spots:word_search' %}">
-        条件をリセット
-      </a>
+      <div class="actions">
+        <button class="btn" type="submit">検索</button>
+      </div>
+
     </form>
   </div>
 </div>

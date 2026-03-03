@@ -1,43 +1,191 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}クチコミ投稿{% endblock %}
+{% block title %}クチコミ投稿 | TRIP+{% endblock %}
 {% block header_title %}クチコミ投稿{% endblock %}
-{% block header_action %}{% endblock %}
 
 {% block extra_css %}
 <style>
-  .wrap{max-width:720px;margin:0 auto;}
-  .card{background:#fff;border:1px solid #eee;border-radius:16px;padding:18px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
-  label{display:block;font-size:13px;color:#374151;margin-bottom:6px;font-weight:800;}
-  input, textarea, select{width:100%; padding:10px; border:1px solid #ddd; border-radius:10px;}
-  .btns{display:flex;gap:10px;margin-top:14px;align-items:center;}
-  .muted{color:#6b7280;font-size:13px;margin-bottom:10px;}
+  .wrap{max-width:900px;margin:0 auto;}
+  .panel{
+    background:#fff;border:1px solid #eee;border-radius:16px;
+    padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);
+  }
+
+  .spot-head{display:grid;grid-template-columns:1fr 320px;gap:16px;align-items:start;}
+  @media(max-width:760px){ .spot-head{grid-template-columns:1fr;} }
+
+  .spot-name{font-weight:900;font-size:22px;margin:0 0 8px;}
+  .spot-addr{color:#6b7280;font-size:13px;margin:0;}
+
+  .spot-img{
+    width:100%;aspect-ratio:16/10;object-fit:cover;
+    border-radius:12px;border:1px solid #eee;background:#f3f4f6;
+  }
+
+  .field{margin-top:14px;}
+  .field label{display:block;font-weight:900;margin-bottom:8px;}
+  .field textarea,.field select,.field input{
+    width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:12px;
+    background:#fff;box-sizing:border-box;
+  }
+  .field textarea{min-height:140px;resize:vertical;}
+
+  .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;}
+  .btn{
+    padding:10px 14px;border-radius:12px;border:0;
+    background:#2563eb;color:#fff;font-weight:900;cursor:pointer;
+  }
+  .btn-sub{
+    padding:10px 14px;border-radius:12px;border:1px solid #e5e7eb;
+    background:#fff;font-weight:900;cursor:pointer;
+    text-decoration:none;color:#111;
+  }
+
+  /* ====== review modal（衝突しない専用クラス）====== */
+  .review-modal{
+    display:none !important;
+    position:fixed !important;
+    inset:0 !important;
+    z-index:999999 !important;
+
+    /* 背景を暗くして投稿画面を“うっすら見せる” */
+    background:rgba(0,0,0,.35) !important;
+
+    /* 中央寄せ */
+    align-items:center !important;
+    justify-content:center !important;
+  }
+  .review-modal.is-open{
+    display:flex !important;
+  }
+
+  .review-modal__box{
+    width:min(520px, calc(100% - 28px));
+    background:#fff;
+    border:1px solid #eee;
+    border-radius:16px;
+    box-shadow:0 18px 40px rgba(0,0,0,.25);
+    padding:18px 18px 16px;
+    position:relative;
+  }
+
+  .review-modal__close{
+    position:absolute; right:10px; top:10px;
+    border:0; background:transparent;
+    font-size:20px; font-weight:900; cursor:pointer;
+  }
+
+  .review-modal__title{
+    font-size:16px; font-weight:900;
+    text-align:center; line-height:1.6;
+    margin:10px 0 14px;
+  }
+
+  .review-modal__actions{display:flex; justify-content:center;}
+  .review-modal__ok{padding:10px 32px;border-radius:10px;}
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="wrap">
-  <div class="card">
-    <div class="muted">スポット: <b>{{ spot.name }}</b></div>
+  <div class="panel">
 
-    <form method="post">
+    <!-- 上：スポット情報 -->
+    <div class="spot-head">
+      <div>
+        <h2 class="spot-name">{{ spot.name }}</h2>
+        <p class="spot-addr">{{ spot.address }}</p>
+      </div>
+
+      <div>
+        {% if spot.image %}
+          <img class="spot-img" src="{{ spot.image.url }}" alt="{{ spot.name }}">
+        {% else %}
+          <div class="spot-img" aria-hidden="true"></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr style="margin:16px 0;border:none;border-top:1px solid #eee;">
+
+    <!-- フォーム -->
+    <form method="post" id="reviewForm">
       {% csrf_token %}
 
-      <div style="margin:12px 0;">
-        <label>評価（1〜5）</label>
+      <div class="field">
+        <label>{{ form.rating.label }}</label>
         {{ form.rating }}
       </div>
 
-      <div style="margin:12px 0;">
-        <label>コメント</label>
+      <div class="field">
+        <label>クチコミ内容</label>
         {{ form.comment }}
       </div>
 
-      <div class="btns">
-        <button class="btn" type="submit">投稿する</button>
-        <a class="btn btn-sub" href="{% url 'spots:spot_detail' spot.pk %}">キャンセル</a>
+      <div class="actions">
+        <a class="btn-sub" href="{% url 'spots:spot_detail' spot.pk %}">戻る</a>
+
+        {% if mode == "update" %}
+          <button class="btn" type="submit">更新</button>
+        {% else %}
+          <button class="btn" type="button" id="openConfirm">クチコミ投稿</button>
+        {% endif %}
       </div>
     </form>
+
   </div>
 </div>
+
+<!-- ★ body直下に置く（CSS衝突を避けるためクラス名も変更済み） -->
+<div id="reviewModal" class="review-modal" aria-hidden="true">
+  <div class="review-modal__box" role="dialog" aria-modal="true" aria-labelledby="reviewModalTitle">
+    <button type="button" class="review-modal__close" id="closeModal">×</button>
+
+    <div id="reviewModalTitle" class="review-modal__title">
+      クチコミは一度投稿すると<br>変更できません。
+    </div>
+
+    <div class="review-modal__actions">
+      <button type="button" class="btn review-modal__ok" id="submitReview">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const openBtn = document.getElementById("openConfirm");
+  const modal = document.getElementById("reviewModal");
+  const closeBtn = document.getElementById("closeModal");
+  const submitBtn = document.getElementById("submitReview");
+  const form = document.getElementById("reviewForm");
+
+  function openModal(){
+    modal.classList.add("is-open");
+    modal.setAttribute("aria-hidden","false");
+  }
+  function closeModal(){
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden","true");
+  }
+
+  if(openBtn) openBtn.addEventListener("click", openModal);
+  if(closeBtn) closeBtn.addEventListener("click", closeModal);
+
+  // 背景（黒い部分）クリックで閉じる：箱の外だけ反応
+  modal.addEventListener("click", (e)=>{
+    if(e.target === modal) closeModal();
+  });
+
+  document.addEventListener("keydown", (e)=>{
+    if(e.key === "Escape") closeModal();
+  });
+
+  if(submitBtn){
+    submitBtn.addEventListener("click", ()=>{
+      if(form) form.submit();
+    });
+  }
+})();
+</script>
 {% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}ワード検索結果 | TRIP+{% endblock %}
+{% block header_title %}ワード検索結果{% endblock %}
+
+{% block extra_css %}
+<style>
+  .wrap{max-width:1100px;margin:0 auto;}
+  .panel{
+    background:#fff;border:1px solid #eee;border-radius:16px;
+    padding:16px;box-shadow:0 6px 18px rgba(0,0,0,.06);
+  }
+  .title-row{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;}
+  .meta{color:#6b7280;font-size:13px;margin:6px 0 14px;}
+
+  /* ✅ グリッド */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:16px;
+  }
+  @media(max-width:980px){
+    .grid{grid-template-columns:repeat(2, minmax(0, 1fr));}
+  }
+  @media(max-width:560px){
+    .grid{grid-template-columns:1fr;}
+  }
+
+  /* ✅ 1スポット=1カード */
+  .card{
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    overflow:hidden;
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+    min-height: 280px;
+
+    text-decoration:none;
+    color:inherit;
+  }
+  .card:hover{
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+    transform:translateY(-1px);
+    transition:.15s;
+  }
+
+  .thumb{
+    width:100%;
+    height:150px;
+    object-fit:cover;
+    display:block;
+    background:#f3f4f6;
+  }
+
+  .body{
+    padding:12px 12px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
+  }
+  .name{
+    font-weight:900;
+    font-size:15px;
+    line-height:1.2;
+    margin:0;
+    color:#111;
+  }
+  .addr{
+    font-size:12px;
+    color:#6b7280;
+    margin:0;
+    line-height:1.4;
+
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .sub{
+    font-size:12px;
+    color:#374151;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:2px;
+  }
+
+  .actions{
+    padding:0 12px 12px;
+  }
+  .btn{
+    display:block;
+    width:100%;
+    text-align:center;
+    background:#2563eb;
+    color:#fff;
+    text-decoration:none;
+    font-weight:900;
+    border-radius:12px;
+    padding:10px 12px;
+  }
+
+  .pager{display:flex;gap:12px;justify-content:center;align-items:center;margin-top:16px;}
+  .pager a{color:#2563eb;text-decoration:none;font-weight:800;}
+  .pager span{color:#6b7280;font-size:13px;}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="wrap">
+  <div class="panel">
+
+    <div class="title-row">
+      <h2 style="margin:0;">検索結果</h2>
+      {% if count is not None %}
+        <div class="meta" style="margin:0;">{{ count }}件</div>
+      {% endif %}
+    </div>
+
+    {% if refine_word %}
+      <div class="meta">絞り込み：<b>{{ refine_word }}</b></div>
+    {% else %}
+      <div class="meta"></div>
+    {% endif %}
+
+    {% if spots %}
+      <div class="grid">
+        {% for spot in spots %}
+          <div class="card">
+
+            <!-- 画像 + クリックで詳細 -->
+            <a href="{% url 'spots:spot_detail' spot.pk %}" style="text-decoration:none;color:inherit;">
+              {% if spot.image %}
+                <img class="thumb" src="{{ spot.image.url }}" alt="{{ spot.name }}">
+              {% else %}
+                <div class="thumb"></div>
+              {% endif %}
+
+              <div class="body">
+                <p class="name">{{ spot.name }}</p>
+                <p class="addr">{{ spot.address }}</p>
+
+                <div class="sub">
+                  <span>★ {% if spot.avg_rating %}{{ spot.avg_rating|floatformat:1 }}{% else %}-{% endif %}</span>
+                  <span>クチコミ {{ spot.reviews_count|default:0 }}件</span>
+                </div>
+              </div>
+            </a>
+
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="pager">
+        {% if page_obj.has_previous %}
+          <a href="?{{ querystring }}&page={{ page_obj.previous_page_number }}">前へ</a>
+        {% endif %}
+
+        <span>{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?{{ querystring }}&page={{ page_obj.next_page_number }}">次へ</a>
+        {% endif %}
+      </div>
+
+    {% else %}
+      <p style="margin:0;">該当するスポットがありませんでした。</p>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

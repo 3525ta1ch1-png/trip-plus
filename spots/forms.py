@@ -33,46 +33,67 @@ class SpotForm(forms.ModelForm):
     language_3 = forms.CharField(required=False, widget=forms.TextInput(attrs={"class":"form-input"}))
 
     class Meta:
-        model = Spot
-        fields = [
-            "name",
-            "address",
-            "phone",
-            "mood",
-            "purpose",
-            "time_axis",
-            "language",
-            "business_days",
-            "open_time",
-            "close_time",
-            "parking",
-            "access",
-            "image",
-            "website",
-            "description",
-        ]
+      model = Spot
+      fields = [
+        "name",
+        "address",
+        "phone",
+        "business_days",
+        "open_time",
+        "close_time",
+        "parking",
+        "website",
+        "mood",
+        "purpose",
+        "time_axis",
+        "language",
+        "image",
+        "description",
+      ]
 
-        widgets = {
-            "name": forms.TextInput(attrs={"class": "form-input"}),
-            "address": forms.TextInput(attrs={"class": "form-input"}),
-            "phone": forms.TextInput(attrs={"class": "form-input"}),
+      labels = {
+        "name": "名称",
+        "address": "住所",
+        "phone": "電話番号",
+        "mood": "気分",
+        "purpose": "目的",
+        "time_axis": "時間軸",
+        "language": "ワード",
+        "business_days": "営業日",
+        "open_time": "営業時間（開始）",
+        "close_time": "営業時間（終了）",
+        "parking": "駐車場",
+        "image": "画像",
+        "website": "公式URL",
+        "description": "コメント",
+      }
 
-            "mood": forms.TextInput(attrs={"class": "form-input"}),
-            "purpose": forms.TextInput(attrs={"class": "form-input"}),
-            "time_axis": forms.TextInput(attrs={"class": "form-input"}),
-            "language": forms.TextInput(attrs={"class": "form-input"}),
+      widgets = {
+        "name": forms.TextInput(attrs={"class": "form-input"}),
+        "address": forms.TextInput(attrs={"class": "form-input"}),
+        "phone": forms.TextInput(attrs={"class": "form-input"}),
 
-            "open_time": forms.TimeInput(attrs={"type": "time", "class": "form-input"}),
-            "close_time": forms.TimeInput(attrs={"type": "time", "class": "form-input"}),
-            "parking": forms.Select(attrs={"class": "select"}),
+        "mood": forms.TextInput(attrs={"class": "form-input", "placeholder": "その時の気分を入力"}),
+        "purpose": forms.TextInput(attrs={"class": "form-input", "placeholder": "お出かけや訪問の目的を入力"}),
+        "time_axis": forms.TextInput(attrs={"class": "form-input", "placeholder": "訪れたい時間帯やタイミングを入力"}),
+        "language": forms.TextInput(attrs={"class": "form-input"}),
 
-            "access": forms.TextInput(attrs={"class": "form-input"}),
-            "website": forms.URLInput(attrs={"class": "form-input"}),
-            "description": forms.Textarea(attrs={"class": "form-textarea"}),
-        }
+        "open_time": forms.TimeInput(attrs={"type": "time", "class": "form-input"}),
+        "close_time": forms.TimeInput(attrs={"type": "time", "class": "form-input"}),
+        "parking": forms.Select(attrs={"class": "select"}),
+
+        "website": forms.URLInput(attrs={"class": "form-input"}),
+        "description": forms.Textarea(attrs={"class": "form-textarea", "placeholder": "観光地の説明や体験の感想などを入力"}),
+      }
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        for filed in self.fields.values():
+            filed.error_messages["required"] = "この項目は必須です。"
+
+        self.fields["business_days"].label = "営業日"
         
         if self.instance and self.instance.pk:
             def split3(val):
